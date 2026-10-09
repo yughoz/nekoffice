@@ -97,7 +97,7 @@ def run(args):
         except BlockingIOError:
             raise ValueError('The Codex office client is already running.')
         config = load_config(args.config)
-        values = office_env(args.env_file or os.getenv('LITTLE_OFFICE_ENV_FILE') or args.config.parent / '.env')
+        values = office_env(args.env_file or os.getenv('LITTLE_OFFICE_ENV_FILE') or config.get('envFile') or args.config.parent / '.env')
         config['serverUrl'] = values.get('LITTLE_OFFICE_URL', config.get('serverUrl', ''))
         config['apiToken'] = values.get('LITTLE_OFFICE_API_TOKEN', config.get('apiToken', ''))
         config['clientId'] = values.get('LITTLE_OFFICE_CLIENT_ID', config.get('clientId', ''))

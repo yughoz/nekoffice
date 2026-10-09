@@ -41,7 +41,7 @@ elif server:
     temporary = config_path.with_suffix('.installing')
     fd = os.open(temporary, os.O_WRONLY|os.O_CREAT|os.O_TRUNC, 0o600)
     with os.fdopen(fd, 'w') as output:
-        json.dump({'serverUrl':server.rstrip('/'), 'apiToken':token, 'clientId':client_id}, output)
+        json.dump({'serverUrl':server.rstrip('/'), 'apiToken':token, 'clientId':client_id, 'envFile':str(env_path)}, output)
     os.replace(temporary, config_path)
 target = args.home.expanduser().resolve()/'plugins/little-office-bridge'
 target.mkdir(parents=True, exist_ok=True, mode=0o700)

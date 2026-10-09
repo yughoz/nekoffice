@@ -70,6 +70,18 @@ class TransportTests(unittest.TestCase):
                 self.assertEqual(client.url,'https://dotenv.example/api/hermes/heartbeat')
                 self.assertEqual(client.token,'c'*64)
 
+    def test_dotenv_path_saved_in_config_is_used_by_runtime(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root=Path(directory)
+            env_file=root/'.env'
+            env_file.write_text('LITTLE_OFFICE_URL=https://saved.example\nLITTLE_OFFICE_API_TOKEN=' + 'd'*64 + '\n')
+            config=root/'client.json'
+            config.write_text(json.dumps({'clientId':'saved-client','envFile':str(env_file)}))
+            with patch.dict('os.environ', {'LITTLE_OFFICE_CLIENT_CONFIG':str(config)}, clear=True):
+                client=transport.load_transport()
+                self.assertEqual(client.url,'https://saved.example/api/hermes/heartbeat')
+                self.assertEqual(client.token,'d'*64)
+
     def test_worker_close_is_bounded_during_network_outage_and_does_not_write_local_duplicates(self):
         class Slow:
             def send(self,record):

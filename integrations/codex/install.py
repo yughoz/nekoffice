@@ -41,6 +41,7 @@ def main():
     config['apiToken'] = values.get('LITTLE_OFFICE_API_TOKEN') or config.get('apiToken') or getpass.getpass('Office API token: ')
     config['clientId'] = values.get('LITTLE_OFFICE_CLIENT_ID') or config.get('clientId') or uuid.uuid4().hex
     config['machineLabel'] = values.get('LITTLE_OFFICE_MACHINE_LABEL') or config.get('machineLabel', '')
+    config['envFile'] = str(env_path)
     Transport(config)  # Validate before mutating the installation.
     if args.autostart:
         subprocess.run(['launchctl', 'bootout', 'gui/' + str(os.getuid()) + '/' + LABEL], capture_output=True)

@@ -79,7 +79,7 @@ def load_transport():
         config = json.loads(path.read_text())
         if not isinstance(config, dict):
             raise ValueError('Little Office client config must be an object.')
-    values = office_env(os.getenv('LITTLE_OFFICE_ENV_FILE', str(path.parent / '.env')))
+    values = office_env(os.getenv('LITTLE_OFFICE_ENV_FILE', config.get('envFile', str(path.parent / '.env'))))
     url = values.get('LITTLE_OFFICE_URL', config.get('serverUrl', ''))
     if not url:
         return None
