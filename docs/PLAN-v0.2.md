@@ -2,7 +2,7 @@
 
 Nekoffice v0.2 membuat kantor lebih mudah dibaca: terlihat client mana yang terhubung, siapa sedang mengerjakan apa, dan kapan suatu session selesai. Pengalaman utama tetap satu ruangan besar dengan manusia chibi dan komputer. Detail koneksi, filter, dan riwayat dibuka melalui panel kecil agar kantor tetap menjadi fokus.
 
-Status: rancangan untuk implementasi. Tanggal: 9 Oktober 2026. Keenam fitur di bawah masuk target rilis v0.2. Agent dan script tetap berjalan di sistem user; Nekoffice menerima metadata dan menampilkan aktivitasnya.
+Status: implementasi fungsional v0.2 sudah dideploy; rincian pose lanjutan dan retensi penuh tetap menjadi ruang iterasi berikutnya. Tanggal: 9 Oktober 2026. Keenam fitur di bawah menjadi target rilis v0.2. Agent dan script tetap berjalan di sistem user; Nekoffice menerima metadata dan menampilkan aktivitasnya.
 
 ## Kondisi implementasi sekarang
 
