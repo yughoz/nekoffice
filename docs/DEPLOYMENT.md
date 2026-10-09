@@ -4,7 +4,7 @@ Live: **https://office.nekoding.xyz/**. Dideploy pada 9 Oktober 2026.
 
 Server: `ubuntu@43.157.243.100`. DNS A domain sudah mengarah ke server. Aplikasi berjalan dalam container `nekoffice-office-1`, dengan restart policy `unless-stopped` dan health check. Caddy host menangani HTTPS Let's Encrypt, redirect HTTP ke HTTPS, dan reverse proxy ke `127.0.0.1:3018`. Port aplikasi hanya terbuka di localhost host.
 
-Source aplikasi yang dideploy berasal dari commit `79a1ec8346a1d80c3abc29529c075bdc95d1be8d` repo `yughoz/nekoffice`, termasuk receiver Codex dan Hermes. Karena repo privat dan VPS belum punya akses GitHub, release dikirim lewat SSH dari archive commit lokal. Paket hanya menyertakan source build dan aset karakter yang digunakan; aset demo workflow lama tidak diperlukan oleh kantor saat ini.
+Source aplikasi yang dideploy berasal dari commit `befbe80df00aedfd3cadd64a0123b8cad72aafb3` repo `yughoz/nekoffice`, termasuk panel v0.2, receiver Codex dan Hermes. Karena repo privat dan VPS belum punya akses GitHub, release dikirim lewat SSH dari archive commit lokal. Paket hanya menyertakan source build dan aset karakter yang digunakan; aset demo workflow lama tidak diperlukan oleh kantor saat ini.
 
 ## Lokasi di VPS
 
@@ -59,5 +59,6 @@ Untuk release baru, kirim source ke direktori release baru, build tag commit bar
 - Browser memuat kantor dan seluruh aset karakter tanpa error pemuatan.
 - Pengamat Codex lokal terhubung melalui HTTPS: server menerima 1 client dan 1 session asli `yt-office-codex` dari chat pengembangan ini; browser memperlihatkan avatar bekerja beserta peran Codex Desktop / IDE.
 - 19 tes TypeScript, 9 tes client Codex Python dan 9 tes Hermes Python lolos; build lokal serta image produksi berhasil.
+- v0.2 terverifikasi pada browser publik: panel Koneksi menampilkan Hermes dan Codex per mesin, panel Penghuni menyediakan filter project/mesin/provider, dan panel Riwayat menampilkan interval session.
 
-![Session Codex asli bekerja pada domain publik dalam mode Live API](screenshots/codex-bridge.png)
+![Panel v0.2 pada domain publik](screenshots/v02-panels.png)
