@@ -1,0 +1,13 @@
+{
+ "cell":{"width":48,"height":48,"safe_margin":4},
+ "style":"Cozy crisp pixel art human chibi, orthographic top-down three-quarter. Match the identity reference exactly: tousled dark brown hair, sage green cardigan, cream shirt, charcoal trousers, brown shoes. One uniform pixel grid, no antialiasing, no shadows or props except a tablet in work state.",
+ "fit":{"resample":"nearest","align_x":"foot-centroid","align_y":"bottom","ground_frames":true,"pixel_unfake":true,"logical_height":32,"palette_size":24,"outline":0},
+ "states":{
+  "idle":{"frames":4,"fps":4,"loop":true,"action":"Facing DOWN towards screen bottom, planted feet, subtle breathing and a single eye blink. Frame 4 returns to frame 1 pose. Same body height and proportions in every frame."},
+  "walk_down":{"frames":4,"fps":8,"loop":true,"action":"Walk in place facing DOWN towards screen bottom. Frame1 left foot forward right back, frame2 both feet passing, frame3 right foot forward left back, frame4 both feet passing. Arms swing opposite feet. Stable head, no translation or spinning. Full body in every pose."},
+  "walk_up":{"frames":4,"fps":8,"loop":true,"action":"Walk in place facing UP away from camera, see the back of hair and green cardigan, no visible face. Frame1 left foot forward right back, frame2 both feet passing, frame3 right foot forward left back, frame4 both feet passing. Arms swing opposite feet. Stable head, no translation or spinning."},
+  "walk_side":{"frames":4,"fps":8,"loop":true,"action":"Walk in place in side profile facing RIGHT. Frame1 left foot forward right back, frame2 both feet passing, frame3 right foot forward left back, frame4 both feet passing. Arms swing opposite feet. Stable head, no translation or spinning. Same right-facing side view in all four poses."},
+  "work":{"frames":4,"fps":5,"loop":true,"action":"Facing DOWN in same top-down three-quarter view, standing with both feet planted, holding a small dark navy tablet in front of chest. One hand taps its screen in frames2and3 then returns in frame4. Subtle readable blink and head nod, no extra characters or desk."},
+  "celebrate":{"frames":4,"fps":6,"loop":false,"action":"Facing DOWN, short friendly celebration: frame1 neutral, frame2 right hand raised, frame3 both hands raised in a happy cheer, frame4 neutral idle. Feet planted, no particles, no detached effects, no height change."}
+ }
+}

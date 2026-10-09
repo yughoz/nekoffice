@@ -1,0 +1,31 @@
+{
+  "asset": "assets/concepts/office-v1.png",
+  "type": "static art-direction concept",
+  "technical_inspection": {
+    "format": "PNG",
+    "size": [1536, 1024],
+    "scene_clipping": "none",
+    "scene_inspector": "sprite-gen scene-inspect",
+    "raster_inspector": "create-game-assets asset_report.py"
+  },
+  "visual_review": {
+    "character_count": 3,
+    "readable_roles": ["research in green reading a book", "creative in pink working on tablet", "production in purple mid-step with folder"],
+    "visible_feet": true,
+    "baked_text_or_ui": false,
+    "cozy_palette_and_lighting": true,
+    "central_aisle_clear": true,
+    "camera": "Elevated rectangular room; somewhat frontal. Raise camera angle for navigation readability.",
+    "scale": "Foreground creative is larger; all characters exceed the intended final sprite scale.",
+    "pixel_fidelity": "Illustrative pixel style with texture and gradients; final assets require a controlled grid and palette."
+  },
+  "status": "useful visual target pending user feedback",
+  "runtime_readiness": "concept only",
+  "next_steps": [
+    "Confirm visual direction with the user",
+    "Create independent room and character assets",
+    "Standardize character proportions, anchors and scale",
+    "Produce and inspect animation state rows with sprite-gen",
+    "Build the simulated spectator office"
+  ]
+}

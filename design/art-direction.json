@@ -1,0 +1,42 @@
+{
+  "stage": "visual-target-concept",
+  "approval_status": "pending-visual-review",
+  "purpose": "Virtual office for observing automated agents and subagents, beginning with a simulated demo",
+  "style": "cozy pixel art, human chibi",
+  "camera": "orthographic top-down three-quarter, screen-aligned rectangular map",
+  "palette_roles": {
+    "environment": ["warm honey wood", "cream", "sage green", "muted peach"],
+    "coordinator": "navy",
+    "research": "green",
+    "creative": "pastel pink",
+    "production": "purple",
+    "qa_publishing": "peach"
+  },
+  "first_visual_target": {
+    "rooms": 1,
+    "characters": 3,
+    "poses": ["reading/idle", "working at tablet", "walking with folder"],
+    "aspect_ratio": "3:2",
+    "suggested_logical_canvas": [384, 256],
+    "suggested_character_height_logical_px": [24, 32],
+    "provider": "bumi",
+    "model": "openai/gpt-image-2",
+    "quality": "medium",
+    "format": "png",
+    "prompt_file": "assets/concepts/office-v1.prompt.txt",
+    "asset_type": "concept scene; not a sprite atlas"
+  },
+  "sprite_pipeline": {
+    "skill": "sprite-gen",
+    "generation_provider_support": "Bumi requires an external adapter",
+    "next_stage": "Approve visual target before producing separate state rows, extracted transparent sprites and runtime atlas"
+  },
+  "constraints": [
+    "Exactly three humans",
+    "No baked text or interface",
+    "Distinct silhouettes and team colors at native scale",
+    "Visible feet and consistent character scale",
+    "Open central walking aisle",
+    "Consistent pixel grid and stepped shadows"
+  ]
+}

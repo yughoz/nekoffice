@@ -1,0 +1,6 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {"noEmit":false,"outDir":"dist-server","rootDir":".","types":["node"]},
+  "include": ["server/main.ts","server/api.ts","server/remoteHermes.ts","server/store.ts"],
+  "exclude": ["**/*.test.ts"]
+}

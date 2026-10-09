@@ -1,0 +1,4 @@
+[
+ {"prompt":"assets/concepts/office-empty.prompt.txt","out":"assets/generated/office-empty.png","quality":"high"},
+ {"prompt":"assets/concepts/chibi-base.prompt.txt","out":"assets/generated/chibi-base.png","aspect_ratio":"1:1","quality":"medium"}
+]

@@ -1,0 +1,51 @@
+{
+  "kind": "sprite-gen-scene-inspection",
+  "version": 1,
+  "frames": 1,
+  "source_fingerprints": {
+    "/Users/yughoz/Documents/koding/youtube/yt-office-codex/assets/concepts/office-v1.scene.json": "4fa20f4505f59f838062c5ad716d315356fdb784568142fad0446f22bb22697a",
+    "/Users/yughoz/Documents/koding/youtube/yt-office-codex/assets/concepts/office-v1.png": "c12c8e5f09d2af68c1e7c707ce9efae05c2f5e5bf6e65391ce6f2d611e1b56fc"
+  },
+  "status": "measured",
+  "loop": {
+    "seam_mae": 0.0,
+    "adjacent_mae_mean": 0.0,
+    "adjacent_mae_max": 0.0,
+    "seam_limit": 1.0,
+    "seam_pass": true,
+    "phase_closure_mae": 0.0,
+    "phase_closure_pass": true,
+    "pass": true
+  },
+  "key_like_pixels": {
+    "green": 0,
+    "magenta": 0
+  },
+  "clipping": {
+    "office-concept": {
+      "top_frames": 0,
+      "bottom_frames": 0,
+      "side_frames": 0,
+      "offscreen_frames": 0,
+      "empty_frames": 0,
+      "minimum_top_y": 0.0
+    }
+  },
+  "sources": {
+    "office-concept": {
+      "edge_contact": [
+        {
+          "top": 1536,
+          "bottom": 1536,
+          "left": 1024,
+          "right": 1024
+        }
+      ],
+      "completeness": "unverified",
+      "note": "Edge contact is a diagnostic; missing artwork inside a source needs visual review."
+    }
+  },
+  "tile_joins": {},
+  "warnings": [],
+  "visual_review_required": true
+}

@@ -1,0 +1,11 @@
+node_modules
+dist
+dist-server
+.git
+.env
+.env.*
+.tools
+**/__pycache__
+**/*.pyc
+**/client.json
+assets/generated

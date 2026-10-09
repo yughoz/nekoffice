@@ -1,0 +1,62 @@
+[
+  {
+    "prompt": "assets/generated/sprites/office-worker/prompts/idle.bumi.txt",
+    "out": "assets/generated/sprites/office-worker/raw/idle.png",
+    "refs": [
+      "assets/generated/sprites/office-worker/base-source.png",
+      "assets/generated/sprites/office-worker/references/layout-guides/idle.png"
+    ],
+    "aspect_ratio": "3:2",
+    "quality": "medium"
+  },
+  {
+    "prompt": "assets/generated/sprites/office-worker/prompts/walk_down.bumi.txt",
+    "out": "assets/generated/sprites/office-worker/raw/walk_down.png",
+    "refs": [
+      "assets/generated/sprites/office-worker/base-source.png",
+      "assets/generated/sprites/office-worker/references/layout-guides/walk_down.png"
+    ],
+    "aspect_ratio": "3:2",
+    "quality": "medium"
+  },
+  {
+    "prompt": "assets/generated/sprites/office-worker/prompts/walk_up.bumi.txt",
+    "out": "assets/generated/sprites/office-worker/raw/walk_up.png",
+    "refs": [
+      "assets/generated/sprites/office-worker/base-source.png",
+      "assets/generated/sprites/office-worker/references/layout-guides/walk_up.png"
+    ],
+    "aspect_ratio": "3:2",
+    "quality": "medium"
+  },
+  {
+    "prompt": "assets/generated/sprites/office-worker/prompts/walk_side.bumi.txt",
+    "out": "assets/generated/sprites/office-worker/raw/walk_side.png",
+    "refs": [
+      "assets/generated/sprites/office-worker/base-source.png",
+      "assets/generated/sprites/office-worker/references/layout-guides/walk_side.png"
+    ],
+    "aspect_ratio": "3:2",
+    "quality": "medium"
+  },
+  {
+    "prompt": "assets/generated/sprites/office-worker/prompts/work.bumi.txt",
+    "out": "assets/generated/sprites/office-worker/raw/work.png",
+    "refs": [
+      "assets/generated/sprites/office-worker/base-source.png",
+      "assets/generated/sprites/office-worker/references/layout-guides/work.png"
+    ],
+    "aspect_ratio": "3:2",
+    "quality": "medium"
+  },
+  {
+    "prompt": "assets/generated/sprites/office-worker/prompts/celebrate.bumi.txt",
+    "out": "assets/generated/sprites/office-worker/raw/celebrate.png",
+    "refs": [
+      "assets/generated/sprites/office-worker/base-source.png",
+      "assets/generated/sprites/office-worker/references/layout-guides/celebrate.png"
+    ],
+    "aspect_ratio": "3:2",
+    "quality": "medium"
+  }
+]

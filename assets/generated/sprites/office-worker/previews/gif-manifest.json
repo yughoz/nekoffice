@@ -1,0 +1,157 @@
+{
+  "version": 1,
+  "kind": "sprite-gen-gif-run",
+  "run_dir": "/Users/yughoz/Documents/koding/youtube/yt-office-codex/assets/generated/sprites/office-worker",
+  "exports": [
+    {
+      "state": "idle",
+      "output": "/Users/yughoz/Documents/koding/youtube/yt-office-codex/assets/generated/sprites/office-worker/previews/idle.gif",
+      "frames": 4,
+      "fps": 4.0,
+      "loop": true,
+      "gif_report": {
+        "path": "/Users/yughoz/Documents/koding/youtube/yt-office-codex/assets/generated/sprites/office-worker/previews/idle.gif",
+        "frames": 4,
+        "delay_ticks": [
+          25,
+          25,
+          25,
+          25
+        ],
+        "loop": 0,
+        "transparent": true,
+        "disposal": [
+          2,
+          2,
+          2,
+          2
+        ]
+      }
+    },
+    {
+      "state": "walk_down",
+      "output": "/Users/yughoz/Documents/koding/youtube/yt-office-codex/assets/generated/sprites/office-worker/previews/walk_down.gif",
+      "frames": 4,
+      "fps": 8.0,
+      "loop": true,
+      "gif_report": {
+        "path": "/Users/yughoz/Documents/koding/youtube/yt-office-codex/assets/generated/sprites/office-worker/previews/walk_down.gif",
+        "frames": 4,
+        "delay_ticks": [
+          12,
+          12,
+          12,
+          12
+        ],
+        "loop": 0,
+        "transparent": true,
+        "disposal": [
+          2,
+          2,
+          2,
+          2
+        ]
+      }
+    },
+    {
+      "state": "walk_up",
+      "output": "/Users/yughoz/Documents/koding/youtube/yt-office-codex/assets/generated/sprites/office-worker/previews/walk_up.gif",
+      "frames": 4,
+      "fps": 8.0,
+      "loop": true,
+      "gif_report": {
+        "path": "/Users/yughoz/Documents/koding/youtube/yt-office-codex/assets/generated/sprites/office-worker/previews/walk_up.gif",
+        "frames": 4,
+        "delay_ticks": [
+          12,
+          12,
+          12,
+          12
+        ],
+        "loop": 0,
+        "transparent": true,
+        "disposal": [
+          2,
+          2,
+          2,
+          2
+        ]
+      }
+    },
+    {
+      "state": "walk_side",
+      "output": "/Users/yughoz/Documents/koding/youtube/yt-office-codex/assets/generated/sprites/office-worker/previews/walk_side.gif",
+      "frames": 4,
+      "fps": 8.0,
+      "loop": true,
+      "gif_report": {
+        "path": "/Users/yughoz/Documents/koding/youtube/yt-office-codex/assets/generated/sprites/office-worker/previews/walk_side.gif",
+        "frames": 4,
+        "delay_ticks": [
+          12,
+          12,
+          12,
+          12
+        ],
+        "loop": 0,
+        "transparent": true,
+        "disposal": [
+          2,
+          2,
+          2,
+          2
+        ]
+      }
+    },
+    {
+      "state": "work",
+      "output": "/Users/yughoz/Documents/koding/youtube/yt-office-codex/assets/generated/sprites/office-worker/previews/work.gif",
+      "frames": 4,
+      "fps": 5.0,
+      "loop": true,
+      "gif_report": {
+        "path": "/Users/yughoz/Documents/koding/youtube/yt-office-codex/assets/generated/sprites/office-worker/previews/work.gif",
+        "frames": 4,
+        "delay_ticks": [
+          20,
+          20,
+          20,
+          20
+        ],
+        "loop": 0,
+        "transparent": true,
+        "disposal": [
+          2,
+          2,
+          2,
+          2
+        ]
+      }
+    },
+    {
+      "state": "celebrate",
+      "output": "/Users/yughoz/Documents/koding/youtube/yt-office-codex/assets/generated/sprites/office-worker/previews/celebrate.gif",
+      "frames": 4,
+      "fps": 6.0,
+      "loop": false,
+      "gif_report": {
+        "path": "/Users/yughoz/Documents/koding/youtube/yt-office-codex/assets/generated/sprites/office-worker/previews/celebrate.gif",
+        "frames": 4,
+        "delay_ticks": [
+          16,
+          16,
+          16,
+          16
+        ],
+        "loop": 0,
+        "transparent": true,
+        "disposal": [
+          2,
+          2,
+          2,
+          2
+        ]
+      }
+    }
+  ]
+}

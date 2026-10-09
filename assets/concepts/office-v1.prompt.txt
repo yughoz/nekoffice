@@ -1,0 +1,12 @@
+Create one polished cozy virtual office concept scene for a browser management game, landscape 3:2, in crisp pixel art.
+
+CAMERA AND PIXELS: classic 2D RPG top-down three-quarter view. Rectangular floor and screen-aligned horizontal and vertical room axes, visible furniture tops and short front faces. A 384x256 game screenshot enlarged with nearest-neighbor scaling. Consistent chunky square pixels, clean clusters and silhouettes, restrained palette. Orthographic projection, no perspective convergence. The room fills most of the image, framed by a little cream margin.
+
+EXACTLY THREE CHARACTERS: human chibi agents with large heads and compact bodies, each about one eighth of the scene height. All share matching proportions and scale. Their faces have simple friendly pixel features, tiny eyes, and varied dark hairstyles. Their whole bodies and feet are visible.
+1. Research agent: green sweater, dark trousers, glasses, standing beside a bookshelf and reading nook, calmly holding an open book. Short dark hair.
+2. Creative agent: pastel pink clothing, large cream headphones, dark trousers, using a stylus and drawing tablet at the near side of a wooden desk. Place the body to one side of the desk so the legs and feet are visible. Short dark bob haircut.
+3. Production agent: purple hoodie, dark trousers, headset with microphone, walking to the right through the central aisle carrying a cream folder, visibly mid-step. Tousled dark hair.
+
+ROOM: warm honey wood floor, cream walls, muted sage and peach accents, leafy plants, small bookshelf, comfortable reading chair, two modest workstations with monitors, a mug and one desk lamp. Daylight comes through a window on the upper-left wall. Late-afternoon light and shadows use stepped pixel shapes. Three small working areas around a spacious central aisle. Furniture scale matches the characters. Cozy and alive, with a tidy practical office layout. Characters are the focal points; avoid excessive decorative clutter.
+
+CONSTRAINTS: exactly three people. No text, letters, labels, interface, status badges, speech bubbles, logos, watermarks, or character portraits. No diamond-shaped isometric room, camera tilt, painterly texture, smooth gradients, antialiasing, blur, photographic materials, or 3D rendering. Do not hide characters behind furniture or crop their feet.

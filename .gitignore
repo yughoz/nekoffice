@@ -1,0 +1,12 @@
+.env
+.env.*
+!.env.example
+.tools/
+__pycache__/
+*.pyc
+node_modules/
+dist/
+dist-server/
+client.json
+*.previous
+.DS_Store

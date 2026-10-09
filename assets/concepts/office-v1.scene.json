@@ -1,0 +1,13 @@
+{
+  "kind": "sprite-gen-scene",
+  "version": 1,
+  "canvas": { "width": 1536, "height": 1024, "background": [255, 246, 225, 255] },
+  "fps": 1,
+  "duration": 1,
+  "assets": { "office-concept": { "source": "office-v1.png" } },
+  "planes": { "ground": { "velocity": [0, 0] } },
+  "camera": { "at": [0, 0], "velocity": [0, 0] },
+  "layers": [
+    { "id": "office-concept", "asset": "office-concept", "at": [768, 1024], "plane": "ground", "shadow": false }
+  ]
+}

@@ -1,0 +1,35 @@
+{
+  "provider": "bumi",
+  "request": {
+    "model_id": "openai/gpt-image-2",
+    "parameters": {
+      "prompt": "One single full-body human chibi office worker sprite standing centered, facing camera DOWN towards screen bottom. Cozy authentic pixel art game sprite, orthographic top-down three-quarter view (see top of head and shoulders slightly), not isometric. Tiny 28-pixel-tall character enlarged with exactly square pixels. Head-to-body ratio 1:1.7. Young friendly office worker with short dark brown tousled hair, two simple dark eyes, tiny peach cheeks, sage green cardigan over cream T-shirt, dark charcoal trousers and tiny brown shoes. Neutral balanced standing idle arms relaxed, both feet visible, no props. Clear recognizable shape at tiny native size, subtle warm dark brown 1px outline, restrained 12 color palette. Full body uncropped with large even safe margins all sides. Uniform solid pure magenta #ff00ff background. NO shadow, NO base, NO floor, NO text, NO extra characters, NO gradient, NO smooth rendering, NO antialiasing. Crisp hard square pixel clusters. This is an identity reference for later state rows: keep clothes green so they can be palette-swapped.",
+      "aspect_ratio": "1:1",
+      "quality": "medium",
+      "output_format": "png"
+    }
+  },
+  "response": {
+    "ok": true,
+    "used_cost": 0.28,
+    "image_url": null,
+    "generation_id": "cmuw5hy3f06hzqf0gck5xf9wk",
+    "status": "processing",
+    "balance": 168.23
+  },
+  "last_status_response": {
+    "ok": true,
+    "data": {
+      "id": "cmuw5hy3f06hzqf0gck5xf9wk",
+      "status": "completed",
+      "prompt": "One single full-body human chibi office worker sprite standing centered, facing camera DOWN towards screen bottom. Cozy authentic pixel art game sprite, orthographic top-down three-quarter view (see top of head and shoulders slightly), not isometric. Tiny 28-pixel-tall character enlarged with exactly square pixels. Head-to-body ratio 1:1.7. Young friendly office worker with short dark brown tousled hair, two simple dark eyes, tiny peach cheeks, sage green cardigan over cream T-shirt, dark charcoal trousers and tiny brown shoes. Neutral balanced standing idle arms relaxed, both feet visible, no props. Clear recognizable shape at tiny native size, subtle warm dark brown 1px outline, restrained 12 color palette. Full body uncropped with large even safe margins all sides. Uniform solid pure magenta #ff00ff background. NO shadow, NO base, NO floor, NO text, NO extra characters, NO gradient, NO smooth rendering, NO antialiasing. Crisp hard square pixel clusters. This is an identity reference for later state rows: keep clothes green so they can be palette-swapped.",
+      "model": "openai/gpt-image-2",
+      "type": "image",
+      "aspectRatio": "1:1",
+      "resultUrl": "https://storage.bumi.digital/generations/cmuw5hy3f06hzqf0gck5xf9wk.png",
+      "error": null,
+      "creditsUsed": 0.28,
+      "createdAt": "2026-10-06T11:00:33+07:00"
+    }
+  }
+}

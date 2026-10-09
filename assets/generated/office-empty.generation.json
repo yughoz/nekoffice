@@ -1,0 +1,35 @@
+{
+  "provider": "bumi",
+  "request": {
+    "model_id": "openai/gpt-image-2",
+    "parameters": {
+      "prompt": "Game background asset for a cozy pixel art virtual office. NO humans, NO characters, NO animals, NO text, NO labels, NO letters, NO UI. Strict orthographic TOP DOWN three-quarter view: rectangular screen-aligned rooms, see floor clearly, furniture tops visible, wall heights short so all floor is visible. 3:2 canvas. One single dollhouse office building filling canvas with a quiet cream margin. Four quadrants each with two wooden desks facing NORTH near the BACK/NORTH edge of its room, chairs in front of the desks and big OPEN unobstructed floors on the lower half. TOP LEFT research room sage carpet, bookshelves on back wall, two monitors and stacks of books, notice board. TOP RIGHT creative room dusty rose rug, headphones and drawing tablet, two desks, plants. BOTTOM LEFT production room muted lavender rug, two desks with ultrawide video timeline monitors, server tower on left wall. BOTTOM RIGHT quality and publishing room pale peach carpet, two monitor desks, a small packing shelf, bulletin board. A wide HORIZONTAL corridor crosses the entire center from left to right and a wide VERTICAL corridor through the middle; connect all rooms with large open doorways on the central-cross side. Corridors have honey wooden planks. Make outer walls cream with dark warm brown outline, short cutaway inner walls, several plants at corners, small couch along central corridor leftmost wall. Do not put any furniture in corridor or central open floor space. Balanced flat sprite-game illumination. Authentic crisp pixel-art: restrained 32-color palette, uniform large square pixels, deliberate clusters and stepped edges; no vector curves, no gradients, no antialiasing, no blur. Looks like a polished Stardew Valley office tileset, warm wood, sage, peach, lavender. Furniture must all have same projection. The background will have small independent animated human sprites placed on it later. No baked cast shadows of humans.",
+      "aspect_ratio": "3:2",
+      "quality": "high",
+      "output_format": "png"
+    }
+  },
+  "response": {
+    "ok": true,
+    "used_cost": 0.77,
+    "image_url": null,
+    "generation_id": "cmuw5hxvq06hvqf0gqaav1ewy",
+    "status": "processing",
+    "balance": 168.51
+  },
+  "last_status_response": {
+    "ok": true,
+    "data": {
+      "id": "cmuw5hxvq06hvqf0gqaav1ewy",
+      "status": "completed",
+      "prompt": "Game background asset for a cozy pixel art virtual office. NO humans, NO characters, NO animals, NO text, NO labels, NO letters, NO UI. Strict orthographic TOP DOWN three-quarter view: rectangular screen-aligned rooms, see floor clearly, furniture tops visible, wall heights short so all floor is visible. 3:2 canvas. One single dollhouse office building filling canvas with a quiet cream margin. Four quadrants each with two wooden desks facing NORTH near the BACK/NORTH edge of its room, chairs in front of the desks and big OPEN unobstructed floors on the lower half. TOP LEFT research room sage carpet, bookshelves on back wall, two monitors and stacks of books, notice board. TOP RIGHT creative room dusty rose rug, headphones and drawing tablet, two desks, plants. BOTTOM LEFT production room muted lavender rug, two desks with ultrawide video timeline monitors, server tower on left wall. BOTTOM RIGHT quality and publishing room pale peach carpet, two monitor desks, a small packing shelf, bulletin board. A wide HORIZONTAL corridor crosses the entire center from left to right and a wide VERTICAL corridor through the middle; connect all rooms with large open doorways on the central-cross side. Corridors have honey wooden planks. Make outer walls cream with dark warm brown outline, short cutaway inner walls, several plants at corners, small couch along central corridor leftmost wall. Do not put any furniture in corridor or central open floor space. Balanced flat sprite-game illumination. Authentic crisp pixel-art: restrained 32-color palette, uniform large square pixels, deliberate clusters and stepped edges; no vector curves, no gradients, no antialiasing, no blur. Looks like a polished Stardew Valley office tileset, warm wood, sage, peach, lavender. Furniture must all have same projection. The background will have small independent animated human sprites placed on it later. No baked cast shadows of humans.",
+      "model": "openai/gpt-image-2",
+      "type": "image",
+      "aspectRatio": "3:2",
+      "resultUrl": "https://storage.bumi.digital/generations/cmuw5hxvq06hvqf0gqaav1ewy.png",
+      "error": null,
+      "creditsUsed": 0.77,
+      "createdAt": "2026-10-06T11:00:32+07:00"
+    }
+  }
+}

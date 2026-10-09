@@ -1,0 +1,279 @@
+{
+  "characterId": "office-worker",
+  "engine": "component-row",
+  "game_input": "coord.png",
+  "degraded_static_fallback": false,
+  "curation_applied": false,
+  "frame_variant": "pixel",
+  "sprite_sheet_alpha": "coord.png",
+  "sprite_sheet_alpha_report": "sprite-sheet-alpha.report.json",
+  "base_image": "base-source.png",
+  "cell": {
+    "shape": "square",
+    "width": 48,
+    "height": 48,
+    "safe_margin_x": 4,
+    "safe_margin_y": 4,
+    "size": 48,
+    "safe_margin": 4
+  },
+  "chroma_key": {
+    "name": "magenta",
+    "hex": "#FF00FF",
+    "rgb": [
+      255,
+      0,
+      255
+    ],
+    "selection": "manual"
+  },
+  "animation": {
+    "cellWidth": 48,
+    "cellHeight": 48,
+    "columns": 4,
+    "rows": {
+      "idle": {
+        "row": 0,
+        "frames": 4,
+        "fps": 4,
+        "durations_ms": [
+          250,
+          250,
+          250,
+          250
+        ],
+        "loop": true,
+        "frame_variant": "pixel"
+      },
+      "walk_down": {
+        "row": 1,
+        "frames": 4,
+        "fps": 8,
+        "durations_ms": [
+          125,
+          125,
+          125,
+          125
+        ],
+        "loop": true,
+        "frame_variant": "pixel"
+      },
+      "walk_up": {
+        "row": 2,
+        "frames": 4,
+        "fps": 8,
+        "durations_ms": [
+          125,
+          125,
+          125,
+          125
+        ],
+        "loop": true,
+        "frame_variant": "pixel"
+      },
+      "walk_side": {
+        "row": 3,
+        "frames": 4,
+        "fps": 8,
+        "durations_ms": [
+          125,
+          125,
+          125,
+          125
+        ],
+        "loop": true,
+        "frame_variant": "pixel"
+      },
+      "work": {
+        "row": 4,
+        "frames": 4,
+        "fps": 5,
+        "durations_ms": [
+          200,
+          200,
+          200,
+          200
+        ],
+        "loop": true,
+        "frame_variant": "pixel"
+      },
+      "celebrate": {
+        "row": 5,
+        "frames": 4,
+        "fps": 6,
+        "durations_ms": [
+          167,
+          167,
+          167,
+          167
+        ],
+        "loop": false,
+        "frame_variant": "pixel"
+      }
+    }
+  },
+  "frame_layout": {
+    "sheetWidth": 192,
+    "sheetHeight": 288,
+    "cellWidth": 48,
+    "cellHeight": 48,
+    "rows": {
+      "idle": [
+        {
+          "x": 0,
+          "y": 0,
+          "w": 48,
+          "h": 48
+        },
+        {
+          "x": 48,
+          "y": 0,
+          "w": 48,
+          "h": 48
+        },
+        {
+          "x": 96,
+          "y": 0,
+          "w": 48,
+          "h": 48
+        },
+        {
+          "x": 144,
+          "y": 0,
+          "w": 48,
+          "h": 48
+        }
+      ],
+      "walk_down": [
+        {
+          "x": 0,
+          "y": 48,
+          "w": 48,
+          "h": 48
+        },
+        {
+          "x": 48,
+          "y": 48,
+          "w": 48,
+          "h": 48
+        },
+        {
+          "x": 96,
+          "y": 48,
+          "w": 48,
+          "h": 48
+        },
+        {
+          "x": 144,
+          "y": 48,
+          "w": 48,
+          "h": 48
+        }
+      ],
+      "walk_up": [
+        {
+          "x": 0,
+          "y": 96,
+          "w": 48,
+          "h": 48
+        },
+        {
+          "x": 48,
+          "y": 96,
+          "w": 48,
+          "h": 48
+        },
+        {
+          "x": 96,
+          "y": 96,
+          "w": 48,
+          "h": 48
+        },
+        {
+          "x": 144,
+          "y": 96,
+          "w": 48,
+          "h": 48
+        }
+      ],
+      "walk_side": [
+        {
+          "x": 0,
+          "y": 144,
+          "w": 48,
+          "h": 48
+        },
+        {
+          "x": 48,
+          "y": 144,
+          "w": 48,
+          "h": 48
+        },
+        {
+          "x": 96,
+          "y": 144,
+          "w": 48,
+          "h": 48
+        },
+        {
+          "x": 144,
+          "y": 144,
+          "w": 48,
+          "h": 48
+        }
+      ],
+      "work": [
+        {
+          "x": 0,
+          "y": 192,
+          "w": 48,
+          "h": 48
+        },
+        {
+          "x": 48,
+          "y": 192,
+          "w": 48,
+          "h": 48
+        },
+        {
+          "x": 96,
+          "y": 192,
+          "w": 48,
+          "h": 48
+        },
+        {
+          "x": 144,
+          "y": 192,
+          "w": 48,
+          "h": 48
+        }
+      ],
+      "celebrate": [
+        {
+          "x": 0,
+          "y": 240,
+          "w": 48,
+          "h": 48
+        },
+        {
+          "x": 48,
+          "y": 240,
+          "w": 48,
+          "h": 48
+        },
+        {
+          "x": 96,
+          "y": 240,
+          "w": 48,
+          "h": 48
+        },
+        {
+          "x": 144,
+          "y": 240,
+          "w": 48,
+          "h": 48
+        }
+      ]
+    }
+  }
+}

@@ -1,0 +1,25 @@
+{
+  "ok": true,
+  "assets": [
+    {
+      "path": "assets/concepts/office-v1.png",
+      "format": "PNG",
+      "mode": "RGB",
+      "width": 1536,
+      "height": 1024,
+      "bytes": 2087719,
+      "color_count": ">65535",
+      "has_alpha": false,
+      "alpha_min": 255,
+      "alpha_max": 255,
+      "transparent_pixels": 0,
+      "content_bounds": [
+        0,
+        0,
+        1536,
+        1024
+      ],
+      "problems": []
+    }
+  ]
+}

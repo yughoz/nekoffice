@@ -1,0 +1,10 @@
+services:
+  office:
+    build: .
+    restart: unless-stopped
+    ports:
+      - "${PORT:-3000}:3000"
+    environment:
+      OFFICE_API_TOKEN: ${OFFICE_API_TOKEN:?Set OFFICE_API_TOKEN in .env}
+      HOST: 0.0.0.0
+      PORT: 3000

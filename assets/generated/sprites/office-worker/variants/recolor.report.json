@@ -1,0 +1,586 @@
+{
+  "ok": true,
+  "kind": "sprite-gen-recolor-report",
+  "base": "sprite-sheet-alpha.png",
+  "match": "exact",
+  "tolerance": 0,
+  "alpha_threshold": 8,
+  "variant_count": 5,
+  "variants": [
+    {
+      "name": "coord",
+      "sheet": "coord.png",
+      "substituted_pixels": 2340,
+      "substitutions": [
+        {
+          "from": "#4e513d",
+          "to": "#3e4b59",
+          "pixels": 598
+        },
+        {
+          "from": "#70783f",
+          "to": "#53677c",
+          "pixels": 295
+        },
+        {
+          "from": "#818b4d",
+          "to": "#637c92",
+          "pixels": 303
+        },
+        {
+          "from": "#9ca561",
+          "to": "#809fb5",
+          "pixels": 217
+        },
+        {
+          "from": "#aab16f",
+          "to": "#97b3c7",
+          "pixels": 487
+        },
+        {
+          "from": "#afb571",
+          "to": "#a6c2d5",
+          "pixels": 440
+        }
+      ],
+      "unused_sources": [],
+      "passthrough_pixels": 12044,
+      "passthrough_color_count": 18,
+      "passthrough_colors": [
+        {
+          "hex": "#1d150a",
+          "pixels": 4009
+        },
+        {
+          "hex": "#322b1c",
+          "pixels": 3168
+        },
+        {
+          "hex": "#5c4426",
+          "pixels": 1624
+        },
+        {
+          "hex": "#fae2ae",
+          "pixels": 685
+        },
+        {
+          "hex": "#5e4727",
+          "pixels": 565
+        },
+        {
+          "hex": "#513d20",
+          "pixels": 540
+        },
+        {
+          "hex": "#eeac66",
+          "pixels": 274
+        },
+        {
+          "hex": "#faeac1",
+          "pixels": 265
+        },
+        {
+          "hex": "#614927",
+          "pixels": 241
+        },
+        {
+          "hex": "#fad092",
+          "pixels": 219
+        },
+        {
+          "hex": "#677576",
+          "pixels": 129
+        },
+        {
+          "hex": "#606262",
+          "pixels": 87
+        },
+        {
+          "hex": "#845a2e",
+          "pixels": 67
+        },
+        {
+          "hex": "#734d22",
+          "pixels": 57
+        },
+        {
+          "hex": "#885d2f",
+          "pixels": 52
+        },
+        {
+          "hex": "#d7bc80",
+          "pixels": 29
+        },
+        {
+          "hex": "#91602b",
+          "pixels": 21
+        },
+        {
+          "hex": "#ad7328",
+          "pixels": 12
+        }
+      ],
+      "manifest": "coord.manifest.json"
+    },
+    {
+      "name": "research",
+      "sheet": "research.png",
+      "substituted_pixels": 2340,
+      "substitutions": [
+        {
+          "from": "#4e513d",
+          "to": "#3f5140",
+          "pixels": 598
+        },
+        {
+          "from": "#70783f",
+          "to": "#607e4c",
+          "pixels": 295
+        },
+        {
+          "from": "#818b4d",
+          "to": "#76965d",
+          "pixels": 303
+        },
+        {
+          "from": "#9ca561",
+          "to": "#8cad71",
+          "pixels": 217
+        },
+        {
+          "from": "#aab16f",
+          "to": "#9cbb82",
+          "pixels": 487
+        },
+        {
+          "from": "#afb571",
+          "to": "#a6c88c",
+          "pixels": 440
+        }
+      ],
+      "unused_sources": [],
+      "passthrough_pixels": 12044,
+      "passthrough_color_count": 18,
+      "passthrough_colors": [
+        {
+          "hex": "#1d150a",
+          "pixels": 4009
+        },
+        {
+          "hex": "#322b1c",
+          "pixels": 3168
+        },
+        {
+          "hex": "#5c4426",
+          "pixels": 1624
+        },
+        {
+          "hex": "#fae2ae",
+          "pixels": 685
+        },
+        {
+          "hex": "#5e4727",
+          "pixels": 565
+        },
+        {
+          "hex": "#513d20",
+          "pixels": 540
+        },
+        {
+          "hex": "#eeac66",
+          "pixels": 274
+        },
+        {
+          "hex": "#faeac1",
+          "pixels": 265
+        },
+        {
+          "hex": "#614927",
+          "pixels": 241
+        },
+        {
+          "hex": "#fad092",
+          "pixels": 219
+        },
+        {
+          "hex": "#677576",
+          "pixels": 129
+        },
+        {
+          "hex": "#606262",
+          "pixels": 87
+        },
+        {
+          "hex": "#845a2e",
+          "pixels": 67
+        },
+        {
+          "hex": "#734d22",
+          "pixels": 57
+        },
+        {
+          "hex": "#885d2f",
+          "pixels": 52
+        },
+        {
+          "hex": "#d7bc80",
+          "pixels": 29
+        },
+        {
+          "hex": "#91602b",
+          "pixels": 21
+        },
+        {
+          "hex": "#ad7328",
+          "pixels": 12
+        }
+      ],
+      "manifest": "research.manifest.json"
+    },
+    {
+      "name": "creative",
+      "sheet": "creative.png",
+      "substituted_pixels": 2340,
+      "substitutions": [
+        {
+          "from": "#4e513d",
+          "to": "#62484f",
+          "pixels": 598
+        },
+        {
+          "from": "#70783f",
+          "to": "#94677c",
+          "pixels": 295
+        },
+        {
+          "from": "#818b4d",
+          "to": "#ab7c93",
+          "pixels": 303
+        },
+        {
+          "from": "#9ca561",
+          "to": "#c296a8",
+          "pixels": 217
+        },
+        {
+          "from": "#aab16f",
+          "to": "#d4a4b5",
+          "pixels": 487
+        },
+        {
+          "from": "#afb571",
+          "to": "#dfafc0",
+          "pixels": 440
+        }
+      ],
+      "unused_sources": [],
+      "passthrough_pixels": 12044,
+      "passthrough_color_count": 18,
+      "passthrough_colors": [
+        {
+          "hex": "#1d150a",
+          "pixels": 4009
+        },
+        {
+          "hex": "#322b1c",
+          "pixels": 3168
+        },
+        {
+          "hex": "#5c4426",
+          "pixels": 1624
+        },
+        {
+          "hex": "#fae2ae",
+          "pixels": 685
+        },
+        {
+          "hex": "#5e4727",
+          "pixels": 565
+        },
+        {
+          "hex": "#513d20",
+          "pixels": 540
+        },
+        {
+          "hex": "#eeac66",
+          "pixels": 274
+        },
+        {
+          "hex": "#faeac1",
+          "pixels": 265
+        },
+        {
+          "hex": "#614927",
+          "pixels": 241
+        },
+        {
+          "hex": "#fad092",
+          "pixels": 219
+        },
+        {
+          "hex": "#677576",
+          "pixels": 129
+        },
+        {
+          "hex": "#606262",
+          "pixels": 87
+        },
+        {
+          "hex": "#845a2e",
+          "pixels": 67
+        },
+        {
+          "hex": "#734d22",
+          "pixels": 57
+        },
+        {
+          "hex": "#885d2f",
+          "pixels": 52
+        },
+        {
+          "hex": "#d7bc80",
+          "pixels": 29
+        },
+        {
+          "hex": "#91602b",
+          "pixels": 21
+        },
+        {
+          "hex": "#ad7328",
+          "pixels": 12
+        }
+      ],
+      "manifest": "creative.manifest.json"
+    },
+    {
+      "name": "production",
+      "sheet": "production.png",
+      "substituted_pixels": 2340,
+      "substitutions": [
+        {
+          "from": "#4e513d",
+          "to": "#4c425b",
+          "pixels": 598
+        },
+        {
+          "from": "#70783f",
+          "to": "#7b6b98",
+          "pixels": 295
+        },
+        {
+          "from": "#818b4d",
+          "to": "#8f82b1",
+          "pixels": 303
+        },
+        {
+          "from": "#9ca561",
+          "to": "#a598c3",
+          "pixels": 217
+        },
+        {
+          "from": "#aab16f",
+          "to": "#b1a6cf",
+          "pixels": 487
+        },
+        {
+          "from": "#afb571",
+          "to": "#c0b3df",
+          "pixels": 440
+        }
+      ],
+      "unused_sources": [],
+      "passthrough_pixels": 12044,
+      "passthrough_color_count": 18,
+      "passthrough_colors": [
+        {
+          "hex": "#1d150a",
+          "pixels": 4009
+        },
+        {
+          "hex": "#322b1c",
+          "pixels": 3168
+        },
+        {
+          "hex": "#5c4426",
+          "pixels": 1624
+        },
+        {
+          "hex": "#fae2ae",
+          "pixels": 685
+        },
+        {
+          "hex": "#5e4727",
+          "pixels": 565
+        },
+        {
+          "hex": "#513d20",
+          "pixels": 540
+        },
+        {
+          "hex": "#eeac66",
+          "pixels": 274
+        },
+        {
+          "hex": "#faeac1",
+          "pixels": 265
+        },
+        {
+          "hex": "#614927",
+          "pixels": 241
+        },
+        {
+          "hex": "#fad092",
+          "pixels": 219
+        },
+        {
+          "hex": "#677576",
+          "pixels": 129
+        },
+        {
+          "hex": "#606262",
+          "pixels": 87
+        },
+        {
+          "hex": "#845a2e",
+          "pixels": 67
+        },
+        {
+          "hex": "#734d22",
+          "pixels": 57
+        },
+        {
+          "hex": "#885d2f",
+          "pixels": 52
+        },
+        {
+          "hex": "#d7bc80",
+          "pixels": 29
+        },
+        {
+          "hex": "#91602b",
+          "pixels": 21
+        },
+        {
+          "hex": "#ad7328",
+          "pixels": 12
+        }
+      ],
+      "manifest": "production.manifest.json"
+    },
+    {
+      "name": "qa",
+      "sheet": "qa.png",
+      "substituted_pixels": 2340,
+      "substitutions": [
+        {
+          "from": "#4e513d",
+          "to": "#685044",
+          "pixels": 598
+        },
+        {
+          "from": "#70783f",
+          "to": "#a07656",
+          "pixels": 295
+        },
+        {
+          "from": "#818b4d",
+          "to": "#b78c67",
+          "pixels": 303
+        },
+        {
+          "from": "#9ca561",
+          "to": "#cca075",
+          "pixels": 217
+        },
+        {
+          "from": "#aab16f",
+          "to": "#dcad83",
+          "pixels": 487
+        },
+        {
+          "from": "#afb571",
+          "to": "#edbe94",
+          "pixels": 440
+        }
+      ],
+      "unused_sources": [],
+      "passthrough_pixels": 12044,
+      "passthrough_color_count": 18,
+      "passthrough_colors": [
+        {
+          "hex": "#1d150a",
+          "pixels": 4009
+        },
+        {
+          "hex": "#322b1c",
+          "pixels": 3168
+        },
+        {
+          "hex": "#5c4426",
+          "pixels": 1624
+        },
+        {
+          "hex": "#fae2ae",
+          "pixels": 685
+        },
+        {
+          "hex": "#5e4727",
+          "pixels": 565
+        },
+        {
+          "hex": "#513d20",
+          "pixels": 540
+        },
+        {
+          "hex": "#eeac66",
+          "pixels": 274
+        },
+        {
+          "hex": "#faeac1",
+          "pixels": 265
+        },
+        {
+          "hex": "#614927",
+          "pixels": 241
+        },
+        {
+          "hex": "#fad092",
+          "pixels": 219
+        },
+        {
+          "hex": "#677576",
+          "pixels": 129
+        },
+        {
+          "hex": "#606262",
+          "pixels": 87
+        },
+        {
+          "hex": "#845a2e",
+          "pixels": 67
+        },
+        {
+          "hex": "#734d22",
+          "pixels": 57
+        },
+        {
+          "hex": "#885d2f",
+          "pixels": 52
+        },
+        {
+          "hex": "#d7bc80",
+          "pixels": 29
+        },
+        {
+          "hex": "#91602b",
+          "pixels": 21
+        },
+        {
+          "hex": "#ad7328",
+          "pixels": 12
+        }
+      ],
+      "manifest": "qa.manifest.json"
+    }
+  ]
+}
