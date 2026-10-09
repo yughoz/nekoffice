@@ -121,3 +121,7 @@ python3 -m unittest discover -s integrations/hermes -v
 ```
 
 Tes memeriksa lifecycle/resume, selesai sebelum startup, stale/crash, subagent/guardian, record parsial UTF-8, truncation, bounded tail, penyaringan konten sensitif, autentikasi HTTP, redirect, serta kompatibilitas Hermes.
+
+Pada 9 Oktober 2026, client dipasang dan dijalankan di Mac lokal. API publik menerima 1 client / 1 session aktif dari chat Codex yang sedang membangun bridge ini; nama `yt-office-codex` berasal dari cwd project. Browser mode Live API memperlihatkan avatar di komputer dengan label aktivitas. Ini verifikasi aktivitas asli, tanpa memasukkan agent demo ke API publik.
+
+![Session Codex asli di Nekoffice](screenshots/codex-bridge.png)
