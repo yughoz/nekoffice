@@ -1,6 +1,6 @@
 import {createServer,type IncomingMessage,type ServerResponse} from 'node:http';
 import {readFile,stat} from 'node:fs/promises';
-import {resolve,extname,sep} from 'node:path';
+import {resolve,extname,sep,join} from 'node:path';
 import {fileURLToPath} from 'node:url';
 import {createOfficeApi} from './api.js';
 
@@ -19,7 +19,8 @@ async function staticFile(req:IncomingMessage,res:ServerResponse){
  try{const info=await stat(filename);if(!info.isFile())throw new Error();const data=await readFile(filename);res.writeHead(200,{'Content-Type':mime[extname(filename)]??'application/octet-stream','Content-Length':data.length,'Cache-Control':path.startsWith('/assets/')&&/[-][a-zA-Z0-9_-]{8,}\./.test(path)?'public,max-age=31536000,immutable':'no-cache','X-Content-Type-Options':'nosniff'});res.end(req.method==='HEAD'?undefined:data);}
  catch{res.writeHead(404);res.end('Not found');}
 }
-const api=createOfficeApi({token});
+const dataDir=process.env.OFFICE_DATA_DIR;
+const api=createOfficeApi({token,historyPath:dataDir?join(dataDir,'history.json'):undefined});
 const server=createServer((req,res)=>{void api.middleware(req,res,()=>{void staticFile(req,res);});});
 server.requestTimeout=15000;server.headersTimeout=10000;
 api.start();server.listen(port,host,()=>console.log(`Little Office server: http://${host}:${port}`));

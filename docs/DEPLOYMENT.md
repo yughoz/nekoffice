@@ -13,11 +13,14 @@ Source aplikasi yang dideploy berasal dari commit `befbe80df00aedfd3cadd64a0123b
 | `/opt/nekoffice/releases/<commit>/` | Source build per release |
 | `/opt/nekoffice/current` | Symlink release aktif |
 | `/opt/nekoffice/.env` | Token API, port bind, dan tag release; permission 0600 |
+| `/opt/nekoffice/data/` | Riwayat v0.2; volume host persisten, tidak masuk image |
 | `/etc/caddy/conf.d/office.nekoding.xyz.caddy` | Proxy khusus domain kantor |
 
 Password SSH dan token API tidak disimpan di repo. Token API dibuat acak di VPS. Config client lokal disimpan pada `~/.hermes/plugins/little-office-bridge/client.json` dengan permission 0600; URL-nya sudah diset ke domain publik. Gateway lokal berhasil memuat ulang hook. Terminal yang dibuka sebelum perubahan harus dibuka ulang; instal plugin pada tiap profile/mesin tambahan mengikuti [panduan client](SERVER-CLIENT.md).
 
 Client Codex juga sudah terpasang pada Mac lokal, di `~/.codex/nekoffice/`, dengan config permission 0600 dan LaunchAgent `xyz.nekoding.office.codex`. Client ini membaca lifecycle session Desktop/CLI lokal yang sudah berjalan dan memakai token server yang sama. [Panduan Codex](CODEX-BRIDGE.md) menjelaskan cara memasang di mesin lain dan batas parser.
+
+Riwayat v0.2 disimpan di `/opt/nekoffice/data/history.json` melalui bind mount ke container. History yang sedang terbuka tidak dipulihkan sebagai pekerjaan aktif setelah restart; heartbeat baru membuka interval pengamatan baru. Rekaman yang sudah selesai tetap tersedia.
 
 ## Operasi server
 

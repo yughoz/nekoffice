@@ -4,10 +4,10 @@ import {OfficeStore,EventError} from './store.js';
 import {RemoteClients} from './remoteClients.js';
 import {OfficeHistory} from './history.js';
 
-type Options={token?:string;localHealth?:()=>unknown};
+type Options={token?:string;localHealth?:()=>unknown;historyPath?:string};
 export function createOfficeApi(options:Options={}){
  const store=new OfficeStore(randomUUID()),clients=new Set<ServerResponse>();
- const history=new OfficeHistory();
+ const history=new OfficeHistory(options.historyPath);
  const snapshot=()=>`event: office\ndata: ${JSON.stringify(store.get())}\n\n`;
  const publish=()=>{for(const client of clients)if(!client.destroyed)client.write(snapshot());};
  const remote=new RemoteClients(store,publish),codex=new RemoteClients(store,publish,Date.now,'codex');
