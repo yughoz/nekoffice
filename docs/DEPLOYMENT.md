@@ -4,7 +4,7 @@ Live: **https://office.nekoding.xyz/**. Dideploy pada 9 Oktober 2026.
 
 Server: `ubuntu@43.157.243.100`. DNS A domain sudah mengarah ke server. Aplikasi berjalan dalam container `nekoffice-office-1`, dengan restart policy `unless-stopped` dan health check. Caddy host menangani HTTPS Let's Encrypt, redirect HTTP ke HTTPS, dan reverse proxy ke `127.0.0.1:3018`. Port aplikasi hanya terbuka di localhost host.
 
-Source aplikasi yang dideploy berasal dari commit `0b9788748869e11cf95ebcc3e824058ef2e1282c` repo `yughoz/nekoffice`, termasuk panel v0.4, receiver Codex dan Hermes, badge kelompok parent–subagent, serta teks native browser yang tetap tajam saat zoom. Karena repo privat dan VPS belum punya akses GitHub, release dikirim lewat SSH dari archive commit lokal. Paket hanya menyertakan source build dan aset karakter yang digunakan; aset demo workflow lama tidak diperlukan oleh kantor saat ini.
+Source aplikasi yang dideploy berasal dari commit `3da6755c0546cff81db6a53896be9d2f876465a8` repo `yughoz/nekoffice`, termasuk panel v0.4, receiver Codex dan Hermes, badge kelompok parent–subagent, teks native browser yang tetap tajam saat zoom, serta pairing device dari panel Daftar agent. Karena repo privat dan VPS belum punya akses GitHub, release dikirim lewat SSH dari archive commit lokal. Paket hanya menyertakan source build dan aset karakter yang digunakan; aset demo workflow lama tidak diperlukan oleh kantor saat ini.
 
 ## Lokasi di VPS
 
@@ -61,10 +61,11 @@ Untuk release baru, kirim source ke direktori release baru, build tag commit bar
 - SSE dapat dibaca melalui Caddy; POST tanpa token menghasilkan 401.
 - Browser memuat kantor dan seluruh aset karakter tanpa error pemuatan.
 - Pengamat Codex lokal terhubung melalui HTTPS: server menerima 1 client dan 1 session asli `yt-office-codex` dari chat pengembangan ini; browser memperlihatkan avatar bekerja beserta peran Codex Desktop / IDE.
-- 22 tes TypeScript, 10 tes client Codex Python dan 11 tes Hermes Python lolos; build lokal serta image produksi berhasil.
+- 23 tes TypeScript, 10 tes client Codex Python dan 11 tes Hermes Python lolos; build lokal serta image produksi berhasil.
 - v0.4 terverifikasi pada browser publik: asset release `index-Cgf_jrDk.js`/`index-6TzjV9uP.css` tersaji melalui HTTPS, panel Koneksi dan filter tetap tersedia, dan UI parent–subagent menampilkan badge jumlah child serta detail lima child saat event heartbeat masuk.
 - Perbaikan zoom tersaji lewat `index-B7bgrNzn.js`/`index-CqxTFyGf.css`: nama, aktivitas, badge kelompok, dan label pintu dirender sebagai DOM. Font dibatasi 1–1,65 kali ukuran dasarnya dan kamera tidak membesarkan bitmap teks. Tepian sprite memakai smooth pixel art.
 - Build dan 22 tes TypeScript lolos. Uji browser lokal memeriksa zoom maksimal, pembaruan nama/aktivitas, klik avatar, dan penghapusan label bersama session; seluruh fixture dibersihkan. Browser publik memverifikasi label tajam pada session Codex dan Hermes asli tanpa error console.
+- Release pairing device berhasil dibuild di VPS dan container sehat. Endpoint token device menuntut token admin utama, menyimpan hash token di volume data, menerima token device pada heartbeat Hermes/Codex, dan mendukung revoke. Browser publik memverifikasi tombol Tambah agent, pilihan Hermes + Codex, dan modal Markdown tanpa memasukkan token server ke halaman.
 
 ![Teks nama tajam pada zoom besar di domain publik](screenshots/zoom-sharp-text.png)
 

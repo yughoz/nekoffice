@@ -1,6 +1,6 @@
 # Plan: Tambah agent dan pairing device
 
-Status: implementasi v0.1 selesai di lokal; token device sudah dipisahkan dari token server utama.
+Status: implementasi v0.1 selesai dan sudah dideploy ke `office.nekoding.xyz`; token device sudah dipisahkan dari token server utama.
 
 Tujuan fitur ini adalah membuat onboarding satu device baru dari panel **Daftar agent**. Satu device boleh menjalankan Hermes dan Codex sekaligus dengan satu token device yang sama. Session tetap menjadi identitas agent di kantor, sedangkan token mengidentifikasi device pengirim heartbeat.
 
