@@ -1,7 +1,7 @@
 import Phaser from 'phaser';
 
 type LabelKind = 'name' | 'activity' | 'group' | 'door';
-export type SceneLabel = Phaser.GameObjects.DOMElement & {node:HTMLElement;baseFontSize:number};
+export type SceneLabel = Phaser.GameObjects.DOMElement & {node:HTMLElement;baseFontSize:number;lastZoom?:number;lastDepth?:number};
 const fontSizes:Record<LabelKind,number>={name:12,activity:11,group:10,door:9};
 
 // Keep text in the browser's font renderer instead of enlarging a pixel texture.
@@ -30,5 +30,9 @@ export function syncSceneLabel(label:SceneLabel,text:string,zoom:number,depth:nu
   node.style.display=display;
  }
  // The font itself changes size; cancel camera scaling to avoid bitmap compositing.
- label.setScale(1/zoom).setDepth(depth);
+ // Depth changes continuously while a worker walks. Quantizing it avoids a
+ // DOM/CSS update on every sub-pixel movement without changing draw order.
+ const quantizedDepth=Math.round(depth);
+ if(label.lastZoom!==zoom){label.setScale(1/zoom);label.lastZoom=zoom;}
+ if(label.lastDepth!==quantizedDepth){label.setDepth(quantizedDepth);label.lastDepth=quantizedDepth;}
 }
