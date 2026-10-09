@@ -1,11 +1,22 @@
 """Authenticated outbound snapshots. Network work runs only on the observer's worker thread."""
 import json
+import importlib.util
 import os
 import re
 import uuid
 from pathlib import Path
 from urllib.parse import urlsplit
 from urllib.request import Request, build_opener, HTTPRedirectHandler
+
+try:
+    from .office_env import office_env
+except ImportError:  # The test loader imports this file directly.
+    env_spec = importlib.util.spec_from_file_location('little_office_env', Path(__file__).with_name('office_env.py'))
+    if env_spec is None or env_spec.loader is None:
+        raise
+    env_module = importlib.util.module_from_spec(env_spec)
+    env_spec.loader.exec_module(env_module)
+    office_env = env_module.office_env
 
 
 class NoRedirect(HTTPRedirectHandler):
@@ -68,9 +79,10 @@ def load_transport():
         config = json.loads(path.read_text())
         if not isinstance(config, dict):
             raise ValueError('Little Office client config must be an object.')
-    url = os.getenv('LITTLE_OFFICE_URL', config.get('serverUrl', ''))
+    values = office_env(os.getenv('LITTLE_OFFICE_ENV_FILE', str(path.parent / '.env')))
+    url = values.get('LITTLE_OFFICE_URL', config.get('serverUrl', ''))
     if not url:
         return None
-    token = os.getenv('LITTLE_OFFICE_API_TOKEN', config.get('apiToken', ''))
-    client_id = os.getenv('LITTLE_OFFICE_CLIENT_ID', config.get('clientId', '')) or persistent_client_id(path.parent)
+    token = values.get('LITTLE_OFFICE_API_TOKEN', config.get('apiToken', ''))
+    client_id = values.get('LITTLE_OFFICE_CLIENT_ID', config.get('clientId', '')) or persistent_client_id(path.parent)
     return HttpTransport(url, token, client_id)

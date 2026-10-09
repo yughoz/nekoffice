@@ -2,8 +2,12 @@ import json
 import threading
 import unittest
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
+from pathlib import Path
+import tempfile
+from unittest.mock import patch
 
 from client import Transport
+from office_env import office_env
 
 
 class TransportTests(unittest.TestCase):
@@ -57,6 +61,15 @@ class TransportTests(unittest.TestCase):
     def test_rejects_credentials_in_url_and_invalid_token(self):
         with self.assertRaises(ValueError):
             self.transport('http://user:password@127.0.0.1/')
+
+    def test_dotenv_supplies_server_and_token_without_logging_or_shell_arguments(self):
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / '.env'
+            path.write_text('LITTLE_OFFICE_URL="https://office.example"\nLITTLE_OFFICE_API_TOKEN=' + 'b' * 64 + '\n')
+            with patch.dict('os.environ', {}, clear=True):
+                values = office_env(path)
+            self.assertEqual(values['LITTLE_OFFICE_URL'], 'https://office.example')
+            self.assertEqual(values['LITTLE_OFFICE_API_TOKEN'], 'b' * 64)
         with self.assertRaises(ValueError):
             Transport({'serverUrl': self.url, 'apiToken': 'a' * 64 + '\n', 'clientId': 'machine'})
 

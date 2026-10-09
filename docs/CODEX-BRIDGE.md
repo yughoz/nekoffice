@@ -18,10 +18,23 @@ Implementasi ini dibuat sendiri. [codex-acp](https://github.com/agentclientproto
 
 Python 3.9+ diperlukan. Tidak perlu OpenAI API key tambahan atau package Python eksternal. Gunakan **token API Nekoffice**, bukan kredensial OpenAI. Token server sama dengan `OFFICE_API_TOKEN` pada deployment.
 
+URL dan token dapat diletakkan di file `.env` lokal. Salin [contoh env client](../integrations/client.env.example) ke `.env`, jangan commit file itu, lalu berikan path-nya ke installer:
+
+```dotenv
+LITTLE_OFFICE_URL=https://office.nekoding.xyz
+LITTLE_OFFICE_API_TOKEN=token-server-lu
+```
+
 ```sh
 git clone git@github.com:yughoz/nekoffice.git
 cd nekoffice
 python3 integrations/codex/install.py --server https://office.nekoding.xyz --autostart
+```
+
+Atau gunakan `.env`:
+
+```sh
+python3 integrations/codex/install.py --env-file .env --autostart
 ```
 
 Installer meminta token tanpa menampilkannya. Pada macOS, `--autostart` memasang LaunchAgent, mulai berjalan sekarang, dan aktif lagi saat login. Jika client Hermes Nekoffice sudah dikonfigurasi di mesin yang sama:
@@ -38,6 +51,8 @@ Linux: hilangkan `--autostart`, lalu jalankan client dengan supervisor lu sendir
 python3 integrations/codex/install.py --server https://office.nekoding.xyz
 python3 ~/.codex/nekoffice/client.py run
 ```
+
+Untuk menjalankan manual dengan file env yang berbeda, tambahkan `--env-file /path/ke/.env` atau set `LITTLE_OFFICE_ENV_FILE`. Pada macOS, installer menyimpan path env ke LaunchAgent sehingga service memakai URL/token yang sama setelah login. Environment process `LITTLE_OFFICE_URL`, `LITTLE_OFFICE_API_TOKEN`, `LITTLE_OFFICE_CLIENT_ID`, dan `LITTLE_OFFICE_MACHINE_LABEL` mengoverride nilai file.
 
 Untuk home lain: tambahkan `--home /path/to/codex-home`. Default membaca `CODEX_HOME`, atau `~/.codex`. Autostart macOS saat ini memakai satu service per user; gunakan satu Codex home pada service tersebut. Instal ulang setelah memperbarui source client.
 

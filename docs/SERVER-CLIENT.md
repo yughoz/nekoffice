@@ -53,8 +53,12 @@ Hermes dan Python 3 harus sudah tersedia. Ambil repo, lalu jalankan installer; *
 ```sh
 git clone git@github.com:yughoz/nekoffice.git
 cd nekoffice
-python3 integrations/hermes/install_bridge.py --server https://office.DOMAIN_LU
+cp integrations/client.env.example .env
+# Isi LITTLE_OFFICE_API_TOKEN di .env, lalu:
+python3 integrations/hermes/install_bridge.py --env-file .env
 ```
+
+`LITTLE_OFFICE_URL` dan `LITTLE_OFFICE_API_TOKEN` di `.env` menentukan server dan token client. Alternatifnya, URL dapat diberikan langsung dengan `--server`; token tetap diminta secara tersembunyi. File `.env` hanya berada di mesin client dan jangan dimasukkan ke Git.
 
 Installer meminta token secara tersembunyi. Masukkan nilai `OFFICE_API_TOKEN` server. Config disimpan lokal dengan permission `0600` di `~/.hermes/plugins/little-office-bridge/client.json`; client ID stabil disimpan di `client-id`. Jangan salin ID itu ke mesin kedua: jalankan installer di mesin tersebut agar ID-nya berbeda. Tidak ada API key model yang diperlukan untuk bridge.
 
@@ -70,7 +74,7 @@ python3 integrations/hermes/install_bridge.py --home ~/.hermes/profiles/NAMA_PRO
 
 Config URL/token dan ID mesin dibagi oleh profile pada mesin itu. Aktifkan plugin pada setiap profile yang dipakai terminal, Desktop, atau Telegram. Session antar profile tetap mempunyai ID masing-masing.
 
-Bila ingin config terpisah, set `LITTLE_OFFICE_CLIENT_CONFIG` ke path yang sama ketika memasang dan menjalankan Hermes. Alternatif environment: `LITTLE_OFFICE_URL`, `LITTLE_OFFICE_API_TOKEN`, dan opsional `LITTLE_OFFICE_CLIENT_ID` mengoverride config file. Hindari menaruh token pada argumen command, URL, atau variabel `VITE_*`.
+Bila ingin config terpisah, set `LITTLE_OFFICE_CLIENT_CONFIG` ke path yang sama ketika memasang dan menjalankan Hermes. File env dapat dipilih dengan `--env-file` saat install atau `LITTLE_OFFICE_ENV_FILE` saat runtime. Environment `LITTLE_OFFICE_URL`, `LITTLE_OFFICE_API_TOKEN`, dan opsional `LITTLE_OFFICE_CLIENT_ID` mengoverride file env/config. Hindari menaruh token pada argumen command, URL, atau variabel `VITE_*`.
 
 ## 3. Gunakan Hermes seperti biasa
 

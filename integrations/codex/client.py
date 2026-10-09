@@ -13,6 +13,7 @@ from urllib.error import HTTPError
 from urllib.request import Request, build_opener, HTTPRedirectHandler
 
 from observer import Observer
+from office_env import office_env
 
 
 def default_home():
@@ -95,7 +96,13 @@ def run(args):
             fcntl.flock(lock, fcntl.LOCK_EX | fcntl.LOCK_NB)
         except BlockingIOError:
             raise ValueError('The Codex office client is already running.')
-        transport = Transport(load_config(args.config))
+        config = load_config(args.config)
+        values = office_env(args.env_file or os.getenv('LITTLE_OFFICE_ENV_FILE') or args.config.parent / '.env')
+        config['serverUrl'] = values.get('LITTLE_OFFICE_URL', config.get('serverUrl', ''))
+        config['apiToken'] = values.get('LITTLE_OFFICE_API_TOKEN', config.get('apiToken', ''))
+        config['clientId'] = values.get('LITTLE_OFFICE_CLIENT_ID', config.get('clientId', ''))
+        config['machineLabel'] = values.get('LITTLE_OFFICE_MACHINE_LABEL', config.get('machineLabel', ''))
+        transport = Transport(config)
         observer = Observer(args.home, stale_seconds=args.stale_seconds)
         running = True
 
@@ -135,6 +142,7 @@ def main():
     parser.add_argument('command', choices=('run', 'status'), nargs='?', default='run')
     parser.add_argument('--home', type=Path, default=default_home())
     parser.add_argument('--config', type=Path)
+    parser.add_argument('--env-file', type=Path, help='Optional dotenv file with LITTLE_OFFICE_URL and LITTLE_OFFICE_API_TOKEN.')
     parser.add_argument('--stale-seconds', type=int, default=600)
     args = parser.parse_args()
     args.config = args.config or args.home / 'nekoffice' / 'client.json'
