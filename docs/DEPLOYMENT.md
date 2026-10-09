@@ -65,3 +65,5 @@ Untuk release baru, kirim source ke direktori release baru, build tag commit bar
 - v0.2 terverifikasi pada browser publik: panel Koneksi menampilkan Hermes dan Codex per mesin, panel Penghuni menyediakan filter project/mesin/provider, dan panel Riwayat menampilkan interval session.
 
 ![Panel v0.2 pada domain publik](screenshots/v02-panels.png)
+
+![Koneksi Hermes dan Codex pada domain publik](screenshots/v02-live-connections.png)
