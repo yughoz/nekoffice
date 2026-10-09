@@ -1,6 +1,6 @@
 # Nekoffice v0.4 — kelompok parent–subagent yang lebih bersih
 
-Status: rencana implementasi lokal. v0.4 melanjutkan v0.3 dan belum mengubah deployment publik.
+Status: implementasi lokal selesai dan siap dideploy. v0.4 melanjutkan v0.3; deployment publik dilakukan setelah verifikasi release.
 
 v0.4 membuat hubungan agent utama dan subagent mudah dipahami tanpa memenuhi ruangan dengan tulisan. Agent utama tetap menjadi titik fokus, subagent berdiri di sekitarnya, dan detail lengkap baru muncul ketika penonton memilih kelompok tersebut.
 
@@ -136,3 +136,9 @@ Field tersebut tidak boleh berisi isi percakapan atau command mentah.
 - Graph dependency interaktif antar-subagent.
 - Penyimpanan riwayat jangka panjang dan analitik produktivitas.
 - Deploy otomatis ke VPS atau domain publik.
+
+## Bukti preview lokal
+
+![Dua kelompok Codex dan Hermes](screenshots/v04-local-groups.png)
+
+![Detail parent dan lima subagent](screenshots/v04-local-group-detail.png)
