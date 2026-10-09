@@ -25,6 +25,7 @@ LABELS = {
     'Extension': ('working', 'Menggunakan tool'),
     'AgentMessage': ('working', 'Menyusun jawaban'),
 }
+ACTIVITY = {'Reasoning': 'thinking', 'CommandExecution': 'command', 'FileChange': 'edit', 'McpToolCall': 'command', 'SubAgentActivity': 'command', 'ContextCompaction': 'thinking', 'ImageView': 'research', 'WebSearch': 'research', 'Extension': 'command', 'AgentMessage': 'thinking'}
 
 
 def millis(record, fallback):
@@ -52,6 +53,7 @@ class Session:
     active: bool = False
     status: str = 'done'
     task: str = 'Giliran selesai'
+    activity_code: str = 'generic'
     updated: int = 0
     last_activity: int = 0
     completed_turns: set = field(default_factory=set)
@@ -89,7 +91,7 @@ class Session:
             turn = ''
         if event == 'task_started':
             self.turn, self.active = turn, True
-            self.status, self.task = 'thinking', 'Mulai bekerja'
+            self.status, self.task, self.activity_code = 'thinking', 'Mulai bekerja', 'thinking'
         elif event in ('task_complete', 'turn_aborted'):
             # A late completion from an older turn cannot finish the new turn.
             if turn:
@@ -99,7 +101,7 @@ class Session:
             if turn and self.turn and turn != self.turn:
                 return
             self.turn, self.active = turn or self.turn, False
-            self.status, self.task = 'done', 'Giliran selesai' if event == 'task_complete' else 'Giliran dihentikan'
+            self.status, self.task, self.activity_code = 'done', 'Giliran selesai' if event == 'task_complete' else 'Giliran dihentikan', 'generic'
         elif event in ('item_started', 'item_completed'):
             item = payload.get('item')
             if not isinstance(item, dict) or item.get('type') == 'UserMessage':
@@ -115,6 +117,7 @@ class Session:
                 self.turn = turn
             self.active = True
             self.status, self.task = label
+            self.activity_code = ACTIVITY.get(item.get('type'), 'generic')
         elif event in ('exec_approval_request', 'apply_patch_approval_request', 'request_user_input'):
             if not self.active:
                 return
@@ -208,7 +211,7 @@ class Observer:
             if bootstrap and now - session.last_activity > self.bootstrap_ms:
                 session.active = False
             if session.active and now - session.last_activity > self.stale_ms:
-                session.active, session.status, session.task = False, 'done', 'Session tidak aktif'
+                session.active, session.status, session.task, session.activity_code = False, 'done', 'Session tidak aktif', 'generic'
                 session.updated = now
             if session.id:
                 sessions[session.id] = session
@@ -239,7 +242,9 @@ class Observer:
                 task = 'Subagent: ' + task
             row = {'agent': {'id': 'codex-' + hashlib.sha256(identity.encode()).hexdigest()[:24],
                              'name': root.name, 'role': root.role, 'team': 'production',
-                             'status': status, 'task': task, 'parentId': None, 'progress': None},
+                             'status': status, 'task': task, 'parentId': None, 'progress': None,
+                             'projectName': root.name, 'projectKey': hashlib.sha256((root.name+'\0'+identity).encode()).hexdigest()[:16],
+                             'activityCode': latest.activity_code, 'provider': 'codex'},
                    'active': active, 'updatedAt': latest.updated}
             previous = self.visible.get(identity)
             if previous:
@@ -253,7 +258,7 @@ class Observer:
         for identity, entry in list(self.visible.items()):
             if identity not in present and entry['row']['active']:
                 entry['row']['active'] = False
-                entry['row']['agent'].update(status='done', task='Session tidak aktif')
+                entry['row']['agent'].update(status='done', task='Session tidak aktif', activityCode='generic')
                 entry['row']['updatedAt'], entry['inactive'] = now, now
             if entry['inactive'] is not None and now - entry['inactive'] >= 90_000:
                 del self.visible[identity]

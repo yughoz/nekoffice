@@ -24,13 +24,16 @@ class HttpTransport:
             raise ValueError('Invalid Little Office client ID.')
         self.url = server_url.rstrip('/')+'/api/hermes/heartbeat'
         self.token, self.client_id, self.timeout = token, client_id, timeout
+        self.machine_label = os.getenv('LITTLE_OFFICE_MACHINE_LABEL', '')
+        self.bridge_version = 'hermes-bridge/1.1'
         self.sequence = 0
         self.opener = build_opener(NoRedirect())
 
     def send(self, record):
         self.sequence += 1
         payload = {'version':1, 'clientId':self.client_id, 'producerId':record['instance'],
-                   'sequence':self.sequence, 'sessions':record['sessions']}
+                   'sequence':self.sequence, 'sessions':record['sessions'],
+                   'machineLabel': self.machine_label, 'bridgeVersion': self.bridge_version}
         request = Request(self.url, data=json.dumps(payload, ensure_ascii=False).encode(),
                           headers={'Content-Type':'application/json', 'Authorization':'Bearer '+self.token}, method='POST')
         try:

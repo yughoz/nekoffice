@@ -84,7 +84,7 @@ File instalasi: `~/.codex/nekoffice/{client.py,observer.py,client.json,status.js
 
 ## Kontrak API
 
-`POST /api/codex/heartbeat` memakai JSON dan `Authorization: Bearer TOKEN_SERVER`.
+`POST /api/codex/heartbeat` memakai JSON dan `Authorization: Bearer TOKEN_SERVER`. Versi v0.2 menambahkan `machineLabel`, `bridgeVersion`, `projectName`, `projectKey`, dan `activityCode`; server tetap menerima payload client lama.
 
 ```json
 {

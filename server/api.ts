@@ -2,10 +2,12 @@ import type {IncomingMessage,ServerResponse} from 'node:http';
 import {createHash,randomUUID,timingSafeEqual} from 'node:crypto';
 import {OfficeStore,EventError} from './store.js';
 import {RemoteClients} from './remoteClients.js';
+import {OfficeHistory} from './history.js';
 
 type Options={token?:string;localHealth?:()=>unknown};
 export function createOfficeApi(options:Options={}){
  const store=new OfficeStore(randomUUID()),clients=new Set<ServerResponse>();
+ const history=new OfficeHistory();
  const snapshot=()=>`event: office\ndata: ${JSON.stringify(store.get())}\n\n`;
  const publish=()=>{for(const client of clients)if(!client.destroyed)client.write(snapshot());};
  const remote=new RemoteClients(store,publish),codex=new RemoteClients(store,publish,Date.now,'codex');
@@ -15,8 +17,10 @@ export function createOfficeApi(options:Options={}){
   const path=req.url?.split('?')[0];if(!path?.startsWith('/api/')){next();return;}
   if(req.method==='GET'&&path==='/api/health'){json(res,200,{ok:true,revision:store.get().revision});return;}
   if(req.method==='GET'&&path==='/api/state'){json(res,200,store.get());return;}
-  if(req.method==='GET'&&path==='/api/integrations/hermes'){json(res,200,{...remote.getHealth(),...(options.localHealth?{local:options.localHealth()}:{})});return;}
-  if(req.method==='GET'&&path==='/api/integrations/codex'){json(res,200,codex.getHealth());return;}
+  if(req.method==='GET'&&path==='/api/integrations/hermes'){json(res,200,{...remote.getHealth(),clientsList:remote.getRegistry(),...(options.localHealth?{local:options.localHealth()}:{})});return;}
+  if(req.method==='GET'&&path==='/api/integrations/codex'){json(res,200,{...codex.getHealth(),clientsList:codex.getRegistry()});return;}
+  if(req.method==='GET'&&path==='/api/integrations'){json(res,200,{serverNow:Date.now(),clients:[...remote.getRegistry(),...codex.getRegistry()]});return;}
+  if(req.method==='GET'&&path==='/api/history'){const url=new URL(req.url||'/api/history','http://office.local');json(res,200,history.list(Number(url.searchParams.get('limit')||50),Number(url.searchParams.get('cursor')||0)));return;}
   if(req.method==='GET'&&path==='/api/stream'){
    res.writeHead(200,{'Content-Type':'text/event-stream','Cache-Control':'no-cache','Connection':'keep-alive','X-Accel-Buffering':'no'});res.write('retry: 2000\n\n'+snapshot());clients.add(res);
    const timer=setInterval(()=>{if(!res.destroyed)res.write(': heartbeat\n\n');},15000);timer.unref();res.once('close',()=>{clearInterval(timer);clients.delete(res);});return;
@@ -29,9 +33,9 @@ export function createOfficeApi(options:Options={}){
   try{
    const chunks:Buffer[]=[];let bytes=0;for await(const chunk of req){bytes+=Buffer.byteLength(chunk);if(bytes>65536)throw new EventError('Request body exceeds 64 KiB.',413);chunks.push(Buffer.from(chunk));}
    let body:unknown;try{body=JSON.parse(Buffer.concat(chunks).toString('utf8'));}catch{throw new EventError('Invalid JSON.');}
-   if(path.endsWith('/heartbeat')){const result=(path==='/api/codex/heartbeat'?codex:remote).ingest(body);json(res,200,{ok:true,...result,revision:store.get().revision});return;}
-   const result=store.apply(path==='/api/agents'?{type:'agent.upsert',agent:body}:body);if(!result.duplicate)publish();json(res,200,{ok:true,...result});
+   if(path.endsWith('/heartbeat')){const result=(path==='/api/codex/heartbeat'?codex:remote).ingest(body);const source=path==='/api/codex/heartbeat'?'codex':'hermes';for(const agent of store.get().agents.filter(item=>item.provider===source))history.update(agent,agent.status!=='done',agent.status==='done'?(agent.task.includes('terputus')?'disconnected':'completed'):'observed');json(res,200,{ok:true,...result,revision:store.get().revision});return;}
+   const result=store.apply(path==='/api/agents'?{type:'agent.upsert',agent:body}:body);if(!result.duplicate){const snap=store.get();const changed=snap.agents.find(a=>a.id===((body as any)?.agent?.id||(body as any)?.id));if(changed)history.update(changed,changed.status!=='done',changed.status==='done'?'completed':'observed');publish();}json(res,200,{ok:true,...result});
   }catch(error){json(res,error instanceof EventError?error.status:500,{ok:false,error:error instanceof EventError?error.message:'Server could not process this event.'});}
  }
- return {store,remote,codex,publish,middleware,start:()=>{remote.start();codex.start();},close:()=>{remote.stop();codex.stop();for(const client of clients)client.end();clients.clear();}};
+ return {store,remote,codex,history,publish,middleware,start:()=>{remote.start();codex.start();},close:()=>{remote.stop();codex.stop();for(const client of clients)client.end();clients.clear();}};
 }

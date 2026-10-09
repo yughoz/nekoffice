@@ -51,13 +51,15 @@ class Transport:
         if not isinstance(identity, str) or not re.fullmatch(r'[a-zA-Z0-9_-]{1,80}', identity):
             raise ValueError('Invalid client ID.')
         self.url, self.token, self.identity = url.rstrip('/') + '/api/codex/heartbeat', token, identity
+        self.machine_label, self.bridge_version = str(config.get('machineLabel') or ''), str(config.get('bridgeVersion') or 'codex-observer/0.2')
         self.sequence, self.producer = 0, uuid.uuid4().hex
         self.opener = build_opener(NoRedirect())
 
     def send(self, sessions):
         self.sequence += 1
         body = {'version': 1, 'clientId': self.identity, 'producerId': self.producer,
-                'sequence': self.sequence, 'sessions': sessions}
+                'sequence': self.sequence, 'sessions': sessions, 'machineLabel': self.machine_label,
+                'bridgeVersion': self.bridge_version}
         data = json.dumps(body, ensure_ascii=False).encode()
         if len(data) > 65536:
             return False

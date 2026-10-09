@@ -4,7 +4,7 @@ import type {AgentPatch} from '../src/officeModel.js';
 
 const LEASE_MS=35_000,DEPARTURE_MS=90_000;
 type Session={agent:AgentPatch;active:boolean;updatedAt:number;changedAt:number};
-type Producer={clientId:string;sequence:number;receivedAt:number;sessions:Session[]};
+type Producer={clientId:string;sequence:number;receivedAt:number;sessions:Session[];machineLabel:string;bridgeVersion:string};
 const object=(v:unknown):v is Record<string,unknown>=>!!v&&typeof v==='object'&&!Array.isArray(v);
 function identifier(value:unknown,label:string){if(typeof value!=='string'||!/^[a-zA-Z0-9_-]{1,80}$/.test(value))throw new EventError(`Invalid ${label}.`);return value;}
 
@@ -21,11 +21,13 @@ export class RemoteClients {
  ingest(raw:unknown){
   if(!object(raw)||raw.version!==1||!Number.isSafeInteger(raw.sequence)||(raw.sequence as number)<1||!Array.isArray(raw.sessions)||raw.sessions.length>128)throw new EventError('Expected version 1, positive sequence and at most 128 sessions.');
   const clientId=identifier(raw.clientId,'clientId'),producerId=identifier(raw.producerId,'producerId'),key=clientId+':'+producerId,previous=this.producers.get(key),now=this.now();
+  const machineLabel=typeof raw.machineLabel==='string'&&raw.machineLabel.trim()?raw.machineLabel.trim().slice(0,48):`Mesin ${clientId.slice(0,6)}`;
+  const bridgeVersion=typeof raw.bridgeVersion==='string'&&raw.bridgeVersion.trim()?raw.bridgeVersion.slice(0,32):`${this.kind}-bridge/1`;
   const sessions:Session[]=raw.sessions.map(row=>{
    if(!object(row)||typeof row.active!=='boolean'||typeof row.updatedAt!=='number'||!Number.isSafeInteger(row.updatedAt)||row.updatedAt<0)throw new EventError('Invalid session metadata.');
    const event=parseEvent({type:'agent.upsert',agent:row.agent});
    if(event.type!=='agent.upsert'||!new RegExp('^'+this.kind+'-[a-f0-9]{24}$').test(event.agent.id)||!event.agent.name||!event.agent.role||!event.agent.status)throw new EventError(`Expected a named ${this.kind} session.`);
-   const agent:AgentPatch={...event.agent,id:this.kind+'-'+createHash('sha256').update(clientId+'\0'+event.agent.id).digest('hex').slice(0,24),parentId:null,progress:null};
+   const agent:AgentPatch={...event.agent,id:this.kind+'-'+createHash('sha256').update(clientId+'\0'+event.agent.id).digest('hex').slice(0,24),parentId:null,progress:null,provider:this.kind,machineId:clientId,machineLabel,bridgeVersion,avatarStyle:typeof event.agent.avatarStyle==='number'?event.agent.avatarStyle:createHash('sha256').update(clientId+'\0style\0'+event.agent.id).digest().readUInt8(0)%16};
    const old=previous?.sessions.find(s=>s.agent.id===agent.id);
    const unchanged=old?.updatedAt===row.updatedAt&&old.active===row.active&&JSON.stringify(old.agent)===JSON.stringify(agent);
    return {agent,active:row.active,updatedAt:row.updatedAt,changedAt:unchanged?old!.changedAt:now};
@@ -33,7 +35,11 @@ export class RemoteClients {
   if(new Set(sessions.map(s=>s.agent.id)).size!==sessions.length)throw new EventError('Duplicate session IDs in packet.');
   if(previous&&(raw.sequence as number)<=previous.sequence)return {duplicate:true};
   if(!previous&&this.producers.size>=512)throw new EventError('Producer capacity reached.',429);
-  this.producers.set(key,{clientId,sequence:raw.sequence as number,receivedAt:now,sessions});this.reconcile();return {duplicate:false};
+  this.producers.set(key,{clientId,sequence:raw.sequence as number,receivedAt:now,sessions,machineLabel,bridgeVersion});this.reconcile();return {duplicate:false};
+ }
+ getRegistry(){const now=this.now();const rows=new Map<string,{provider:'codex'|'hermes';clientId:string;machineLabel:string;bridgeVersion:string;lastHeartbeatAt:number;activeSessions:number;connected:boolean}>();
+  for(const producer of this.producers.values()){const key=this.kind+':'+producer.clientId;const current=rows.get(key);const active=producer.sessions.filter(s=>s.active&&now-producer.receivedAt<LEASE_MS).length;const next={provider:this.kind,clientId:producer.clientId,machineLabel:producer.machineLabel,bridgeVersion:producer.bridgeVersion,lastHeartbeatAt:producer.receivedAt,activeSessions:active,connected:now-producer.receivedAt<LEASE_MS} as const;if(!current||next.lastHeartbeatAt>current.lastHeartbeatAt)rows.set(key,next);else current.activeSessions+=active;}
+  return [...rows.values()].sort((a,b)=>b.lastHeartbeatAt-a.lastHeartbeatAt);
  }
  reconcile(){
   const now=this.now(),latest=new Map<string,Session&{receivedAt:number;alive:boolean}>();
@@ -55,7 +61,7 @@ export class RemoteClients {
    try{
     if(previous?.fingerprint!==fingerprint||!this.store.get().agents.some(a=>a.id===id)){this.store.apply({type:'agent.upsert',agent:patch});changed=true;}
     this.tracked.set(id,{fingerprint,inactiveSince});present.add(id);
-   }catch{/* Retry after a seat becomes free; the renderer shares 64 seats with manual API agents. */}
+   }catch(error){if(error instanceof EventError&&error.status!==409)throw error;/* Retry after a seat becomes free; the renderer shares 64 seats with manual API agents. */}
   }
   for(const [id,previous] of this.tracked){
    if(present.has(id))continue;

@@ -1,6 +1,7 @@
-import type {AgentPatch,OfficeAgent,OfficeEvent,OfficeSnapshot,Room,AgentStatus} from '../src/officeModel.js';
+import type {AgentPatch,OfficeAgent,OfficeEvent,OfficeSnapshot,Room,AgentStatus,ActivityCode} from '../src/officeModel.js';
 const rooms:Room[]=['coord','research','creative','production','qa'];
 const statuses:AgentStatus[]=['idle','working','thinking','waiting','error','done'];
+const activities:ActivityCode[]=['generic','edit','command','test','research','thinking','waiting','error'];
 export class EventError extends Error {constructor(message:string,public status=400){super(message);}}
 function text(value:unknown,key:string,max:number,required=false):string|undefined {if(value===undefined&&!required)return undefined;if(typeof value!=='string'||!value.trim()||value.length>max)throw new EventError(`${key} must be a non-empty string, max ${max} characters.`);return value;}
 function id(value:unknown,key='id'):string {const s=text(value,key,80,true)!;if(!/^[a-zA-Z0-9_./:-]+$/.test(s))throw new EventError(`${key} contains unsupported characters.`);return s;}
@@ -16,6 +17,11 @@ export function parseEvent(raw:unknown):OfficeEvent {
   if(a.status!==undefined){if(!statuses.includes(a.status as AgentStatus))throw new EventError('Unsupported agent status.');patch.status=a.status as AgentStatus;}
   if(a.parentId!==undefined)patch.parentId=a.parentId===null?null:id(a.parentId,'parentId');
   if(a.progress!==undefined){if(a.progress!==null&&(typeof a.progress!=='number'||!Number.isFinite(a.progress)||a.progress<0||a.progress>1))throw new EventError('progress must be 0..1 or null.');patch.progress=a.progress as number|null;}
+  if(a.provider!==undefined){if(!['codex','hermes','manual'].includes(a.provider as string))throw new EventError('Unsupported provider.');patch.provider=a.provider as AgentPatch['provider'];}
+  for(const key of ['machineId','machineLabel','bridgeVersion','projectName','projectKey'] as const)if(a[key]!==undefined)patch[key]=text(a[key],key,80,true);
+  if(a.activityCode!==undefined){if(!activities.includes(a.activityCode as ActivityCode))throw new EventError('Unsupported activity code.');patch.activityCode=a.activityCode as ActivityCode;}
+  if(a.avatarStyle!==undefined){const value=a.avatarStyle;if(typeof value!=='number'||!Number.isInteger(value)||value<0||value>15)throw new EventError('avatarStyle must be an integer from 0 to 15.');patch.avatarStyle=value;}
+  if(a.seatIndex!==undefined){const value=a.seatIndex;if(typeof value!=='number'||!Number.isInteger(value)||value<0||value>63)throw new EventError('seatIndex must be an integer from 0 to 63.');patch.seatIndex=value;}
   return {type:'agent.upsert',agent:patch,eventId};
  }
  if(e.type==='agent.move'){const targetRoom=room(e.room);let position: {x:number;y:number}|undefined;
