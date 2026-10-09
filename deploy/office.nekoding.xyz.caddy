@@ -1,0 +1,7 @@
+office.nekoding.xyz {
+    @compress not path /api/stream
+    encode @compress zstd gzip
+    reverse_proxy 127.0.0.1:3018 {
+        flush_interval -1
+    }
+}

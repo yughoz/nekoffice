@@ -1,0 +1,12 @@
+services:
+  office:
+    build:
+      context: ..
+    image: nekoffice:${OFFICE_RELEASE:-latest}
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:${OFFICE_BIND_PORT:-3018}:3000"
+    environment:
+      OFFICE_API_TOKEN: ${OFFICE_API_TOKEN:?Set OFFICE_API_TOKEN}
+      HOST: 0.0.0.0
+      PORT: 3000
