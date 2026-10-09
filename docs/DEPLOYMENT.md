@@ -4,7 +4,7 @@ Live: **https://office.nekoding.xyz/**. Dideploy pada 9 Oktober 2026.
 
 Server: `ubuntu@43.157.243.100`. DNS A domain sudah mengarah ke server. Aplikasi berjalan dalam container `nekoffice-office-1`, dengan restart policy `unless-stopped` dan health check. Caddy host menangani HTTPS Let's Encrypt, redirect HTTP ke HTTPS, dan reverse proxy ke `127.0.0.1:3018`. Port aplikasi hanya terbuka di localhost host.
 
-Source aplikasi yang dideploy berasal dari commit `3da6755c0546cff81db6a53896be9d2f876465a8` repo `yughoz/nekoffice`, termasuk panel v0.4, receiver Codex dan Hermes, badge kelompok parent–subagent, teks native browser yang tetap tajam saat zoom, serta pairing device dari panel Daftar agent. Karena repo privat dan VPS belum punya akses GitHub, release dikirim lewat SSH dari archive commit lokal. Paket hanya menyertakan source build dan aset karakter yang digunakan; aset demo workflow lama tidak diperlukan oleh kantor saat ini.
+Source aplikasi yang dideploy berasal dari commit `4a62c87` repo `yughoz/nekoffice`, termasuk panel v0.4, receiver Codex dan Hermes, badge kelompok parent–subagent, pairing device, optimasi render, serta registrasi/login owner lokal. Karena repo privat dan VPS belum punya akses GitHub, release dikirim lewat SSH dari archive commit lokal. Paket hanya menyertakan source build dan aset karakter yang digunakan; aset demo workflow lama tidak diperlukan oleh kantor saat ini.
 
 ## Lokasi di VPS
 
