@@ -2,18 +2,19 @@
 
 Live di **[office.nekoding.xyz](https://office.nekoding.xyz/)**. Lihat [catatan deployment dan operasi VPS](docs/DEPLOYMENT.md).
 
-**Server pusat + client Hermes sudah tersedia.** Server menyajikan kantor dan API; tiap mesin Hermes hanya menjalankan plugin client yang mengirim status lewat HTTP dengan token. Satu session induk = satu orang, nama dari folder kerja, subagent digabung ke induknya. Ikuti [panduan server dan client](docs/SERVER-CLIENT.md) untuk setup dan deployment Docker.
+**Server pusat + client Hermes dan Codex tersedia.** Server menyajikan kantor dan API; setiap mesin mengirim status lewat HTTP dengan token. Satu session induk = satu orang, nama dari folder kerja, subagent digabung ke induknya. Ikuti [panduan server dan client](docs/SERVER-CLIENT.md) untuk deployment Docker dan [panduan Codex](docs/CODEX-BRIDGE.md) untuk memantau Desktop/CLI yang sudah berjalan.
 
 | Bagian | Source | Dijalankan di |
 | --- | --- | --- |
-| Server API + penyaji kantor | `server/main.ts`, `server/api.ts`, `server/remoteHermes.ts` | Server pusat, `npm start` atau Docker |
+| Server API + penyaji kantor | `server/main.ts`, `server/api.ts`, `server/remoteClients.ts` | Server pusat, `npm start` atau Docker |
 | Client Hermes | `integrations/hermes/little-office-bridge/` | Tiap mesin Hermes, via plugin runtime |
+| Client Codex | `integrations/codex/` | Tiap mesin Codex, pengamat rollout Desktop/CLI |
 | Tampilan browser | `src/` + `public/assets/` | Browser yang membuka URL server |
 
 ```text
 Hermes A + client ─┐
 Hermes B + client ─┼── HTTPS/API server ── kantor di browser
-Hermes C + client ─┘
+Codex + client ────┘
 ```
 
 Satu ruangan kantor cozy pixel art dengan deretan komputer dan avatar manusia chibi. Ada 15 komputer awal; baris meja bertambah otomatis untuk tim yang lebih besar. Saat status `working`, avatar duduk menghadap monitor, tangan bergantian mengetik, badan bergerak halus, dan baris teks/kursor di layar ikut berubah. Gerak dekoratif ini tidak memengaruhi script kerja. Project ini hanya menampilkan aktivitas dari script/agent eksternal. Tidak menjalankan LLM, mengatur workflow, membuat video, atau mengupload YouTube.

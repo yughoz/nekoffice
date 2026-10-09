@@ -130,3 +130,6 @@ hermes plugins validate integrations/hermes/little-office-bridge --json
 Tes mencakup autentikasi, SSE, batas request, identitas multi-mesin, session yang dilanjutkan, heartbeat terputus, clock skew, client HTTP, retry dan shutdown client tanpa menghambat Hermes. Pemasangan lokal dan hook dibahas di [panduan Hermes](HERMES-BRIDGE.md).
 
 Verifikasi saat implementasi: 26 tes lulus, build browser/server lulus, plugin lolos validator resmi Hermes, dan client Python berhasil mengirim dua identitas mesin ke server build yang sebenarnya melalui HTTP lokal. Image Docker kemudian berhasil dibuild dan dijalankan pada VPS; HTTPS, autentikasi dan SSE domain publik sudah terverifikasi. Lihat [deployment live](DEPLOYMENT.md).
+# Client Codex
+
+Selain Hermes, server juga menerima client Codex pada `/api/codex/heartbeat`. Client pengamat bisa langsung membaca Desktop/CLI lokal yang sudah berjalan, tanpa membuka session ACP baru. Setup, autostart, batas parser, dan operasi tersedia di [CODEX-BRIDGE.md](CODEX-BRIDGE.md). Kedua provider dapat bekerja bersamaan dan memakai token server yang sama.
