@@ -52,6 +52,12 @@ Caddy menangani pembaruan sertifikat otomatis. Konfigurasi domain kantor diimpor
 
 Untuk release baru, kirim source ke direktori release baru, build tag commit baru, jalankan Compose dengan `OFFICE_RELEASE=<commit-baru>`, cek health, kemudian perbarui symlink `current` dan nilai `OFFICE_RELEASE` pada `.env`. Pertahankan token API agar client yang sudah terpasang tetap terhubung. Jangan menyalin `.env` ke dalam build context.
 
+### Login owner lokal dan Public Lobby v0.6
+
+Release v0.6 menyimpan akun lokal dan session di `auth.json`, serta directory office di `offices.json` pada volume `/opt/nekoffice/data`. Owner membuat akun lewat tombol **Registrasi**, lalu login dengan username dan password. Password tidak disimpan mentah; server menyimpan salt dan hash scrypt. Tidak ada konfigurasi OAuth atau provider eksternal.
+
+Public Lobby tersedia di `/lobby`, sedangkan office publik memakai `/office/<slug>`. Backup `/opt/nekoffice/data` sebelum release yang menyimpan akun owner dan directory office.
+
 ## Verifikasi deployment
 
 - Docker image berhasil dibuild di VPS dan container sehat.

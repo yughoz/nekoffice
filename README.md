@@ -2,7 +2,7 @@
 
 Live di **[office.nekoding.xyz](https://office.nekoding.xyz/)**. Lihat [catatan deployment dan operasi VPS](docs/DEPLOYMENT.md).
 
-**Server pusat + client Hermes dan Codex tersedia.** Server menyajikan kantor dan API; setiap mesin mengirim status lewat HTTP dengan token. Satu session induk = satu orang, nama dari folder kerja, subagent digabung ke induknya. Ikuti [panduan server dan client](docs/SERVER-CLIENT.md) untuk deployment Docker dan [panduan Codex](docs/CODEX-BRIDGE.md) untuk memantau Desktop/CLI yang sudah berjalan.
+**Server pusat + client Hermes dan Codex tersedia.** Server menyajikan kantor dan API; setiap mesin mengirim status lewat HTTP dengan device token. Penonton dapat membuka office publik tanpa login; owner registrasi atau login dengan akun lokal untuk mengatur office dan pairing device. Satu session induk = satu orang, nama dari folder kerja, subagent digabung ke induknya. Ikuti [panduan server dan client](docs/SERVER-CLIENT.md) untuk deployment Docker, login owner, dan [panduan Codex](docs/CODEX-BRIDGE.md) untuk memantau Desktop/CLI yang sudah berjalan.
 
 | Bagian | Source | Dijalankan di |
 | --- | --- | --- |
@@ -25,6 +25,8 @@ npm run dev
 ```
 
 Buka URL yang dicetak Vite. Pilih **Demo** untuk melihat agent datang bergantian lewat pintu, berjalan ke komputer, mengetik, lalu keluar setelah selesai. Waktu kedatangan, durasi kerja, jeda, dan kecepatan jalan bervariasi antar agent; jadwal demo diacak saat halaman dibuka; demo terus mengulang. Pilih **Live API** untuk melihat agent lu; update pertama dari script otomatis mengaktifkan Live API. Klik avatar untuk melihat status dan aktivitas singkat. Tombol Daftar agent menyediakan pilihan lewat keyboard. Kamera mendukung pan, zoom, fit dan follow. Pause hanya tersedia untuk animasi demo.
+
+Public Lobby tersedia di `/lobby`; kartu office publik membuka `/office/:slug`. Penonton tidak perlu login. Owner memakai tombol **Masuk owner** untuk registrasi/login lokal, mengatur office, dan membuat token device.
 
 ## Hubungkan script
 

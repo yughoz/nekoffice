@@ -16,11 +16,17 @@ async function staticFile(req:IncomingMessage,res:ServerResponse){
  let path:string;try{path=decodeURIComponent((req.url??'/').split('?')[0]);}catch{res.writeHead(400);res.end();return;}
  const filename=resolve(root,'.'+(path==='/'?'/index.html':path));
  if(filename!==root&&!filename.startsWith(root+sep)){res.writeHead(403);res.end();return;}
- try{const info=await stat(filename);if(!info.isFile())throw new Error();const data=await readFile(filename);res.writeHead(200,{'Content-Type':mime[extname(filename)]??'application/octet-stream','Content-Length':data.length,'Cache-Control':path.startsWith('/assets/')&&/[-][a-zA-Z0-9_-]{8,}\./.test(path)?'public,max-age=31536000,immutable':'no-cache','X-Content-Type-Options':'nosniff'});res.end(req.method==='HEAD'?undefined:data);}
+ try{let target=filename;let info;try{info=await stat(target)}catch{if(path.includes('.'))throw new Error();target=resolve(root,'index.html');info=await stat(target)}if(!info.isFile())throw new Error();const data=await readFile(target);res.writeHead(200,{'Content-Type':mime[extname(target)]??'application/octet-stream','Content-Length':data.length,'Cache-Control':path.startsWith('/assets/')&&/[-][a-zA-Z0-9_-]{8,}\./.test(path)?'public,max-age=31536000,immutable':'no-cache','X-Content-Type-Options':'nosniff'});res.end(req.method==='HEAD'?undefined:data);}
  catch{res.writeHead(404);res.end('Not found');}
 }
 const dataDir=process.env.OFFICE_DATA_DIR;
-const api=createOfficeApi({token,historyPath:dataDir?join(dataDir,'history.json'):undefined,deviceTokensPath:dataDir?join(dataDir,'device-tokens.json'):undefined});
+const api=createOfficeApi({
+ token,
+ historyPath:dataDir?join(dataDir,'history.json'):undefined,
+ deviceTokensPath:dataDir?join(dataDir,'device-tokens.json'):undefined,
+ authPath:dataDir?join(dataDir,'auth.json'):undefined,
+ officesPath:dataDir?join(dataDir,'offices.json'):undefined
+});
 const server=createServer((req,res)=>{void api.middleware(req,res,()=>{void staticFile(req,res);});});
 server.requestTimeout=15000;server.headersTimeout=10000;
 api.start();server.listen(port,host,()=>console.log(`Little Office server: http://${host}:${port}`));
