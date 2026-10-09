@@ -1,0 +1,19 @@
+.game-host canvas{image-rendering:auto}
+.scene-label{
+ font-family:'Avenir Next',Inter,system-ui,sans-serif;
+ line-height:1.3;
+ font-weight:600;
+ color:#514833;
+ white-space:nowrap;
+ padding:3px 6px;
+ border-radius:4px;
+ background:#fff9e9f2;
+ border:1px solid #e3d8bc;
+ text-align:center;
+ pointer-events:none;
+ user-select:none;
+}
+.scene-label--name{max-width:160px;overflow:hidden;text-overflow:ellipsis}
+.scene-label--activity{color:#536545;background:#fffef2f5;border-color:#dbe1ca;box-shadow:0 2px 4px #5148330d}
+.scene-label--group{font-weight:750;color:#fffef5;background:#78965e;border-color:#6d8756;border-radius:6px;padding:2px 5px;min-width:23px}
+.scene-label--door{font-weight:700;letter-spacing:.5px;color:#6d7056;background:none;border:0;padding:0}

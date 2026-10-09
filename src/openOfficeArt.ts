@@ -1,5 +1,6 @@
 import Phaser from 'phaser';
 import {roomHeight,seatCount,station} from './officeLayout';
+import {sceneLabel} from './sceneLabels';
 export interface Computer {screen:Phaser.GameObjects.Graphics;cursor:Phaser.GameObjects.Rectangle;}
 export function drawOpenOffice(scene:Phaser.Scene,count:number) {
  const group=scene.add.container(0,0),g=scene.add.graphics();group.add(g);
@@ -20,7 +21,7 @@ export function drawOpenOffice(scene:Phaser.Scene,count:number) {
  box(350,height-39,68,39,0x78654e);box(356,height-37,56,37,0xc9a278);box(356,height-4,56,4,0xe6c9a0);box(347,height-39,6,39,0xb89a72);box(415,height-39,6,39,0xb89a72);
  g.fillStyle(0x8b7151).fillPoints([{x:350,y:height-36},{x:337,y:height-28},{x:337,y:height+2},{x:350,y:height-4}].map(p=>new Phaser.Math.Vector2(p.x,p.y)),true);
  g.fillStyle(0xb79970).fillPoints([{x:347,y:height-32},{x:341,y:height-28},{x:341,y:height-3},{x:347,y:height-6}].map(p=>new Phaser.Math.Vector2(p.x,p.y)),true);
- group.add(scene.add.text(384,height-69,'PINTU',{fontFamily:'Arial, sans-serif',fontSize:'6px',fontStyle:'bold',color:'#6d7056'}).setOrigin(.5));
+ const doorLabel=sceneLabel(scene,384,height-69,'PINTU','door');group.add(doorLabel);
  box(357,height-56,54,15,0x9eaa82);box(361,height-53,46,9,0xb5be98);
  const computers:Computer[]=[];
  for(let i=0;i<seatCount(count);i++){
@@ -33,7 +34,7 @@ export function drawOpenOffice(scene:Phaser.Scene,count:number) {
   box(x-13,y+43,27,19,0x8a9678);box(x-15,y+48,31,7,0x697c61);box(x-10,y+62,3,6,0x6b6b59);box(x+8,y+62,3,6,0x6b6b59);
   const screen=scene.add.graphics(),cursor=scene.add.rectangle(x-19,y-15,2,5,0xb9d7a0).setOrigin(0);group.add([screen,cursor]);computers.push({screen,cursor});
  }
- return {group,computers,height};
+ return {group,computers,height,doorLabel};
 }
 export function drawScreen(computer:Computer,x:number,y:number,active:boolean,phase:number) {
  const g=computer.screen;g.clear();g.fillStyle(active?0x8aaf87:0x596d5e);
