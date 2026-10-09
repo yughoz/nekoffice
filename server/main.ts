@@ -20,7 +20,7 @@ async function staticFile(req:IncomingMessage,res:ServerResponse){
  catch{res.writeHead(404);res.end('Not found');}
 }
 const dataDir=process.env.OFFICE_DATA_DIR;
-const api=createOfficeApi({token,historyPath:dataDir?join(dataDir,'history.json'):undefined});
+const api=createOfficeApi({token,historyPath:dataDir?join(dataDir,'history.json'):undefined,deviceTokensPath:dataDir?join(dataDir,'device-tokens.json'):undefined});
 const server=createServer((req,res)=>{void api.middleware(req,res,()=>{void staticFile(req,res);});});
 server.requestTimeout=15000;server.headersTimeout=10000;
 api.start();server.listen(port,host,()=>console.log(`Little Office server: http://${host}:${port}`));

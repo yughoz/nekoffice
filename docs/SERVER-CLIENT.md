@@ -74,6 +74,14 @@ python3 integrations/hermes/install_bridge.py --home ~/.hermes/profiles/NAMA_PRO
 
 Config URL/token dan ID mesin dibagi oleh profile pada mesin itu. Aktifkan plugin pada setiap profile yang dipakai terminal, Desktop, atau Telegram. Session antar profile tetap mempunyai ID masing-masing.
 
+### Pairing dari panel Daftar agent
+
+Pada server yang sudah mendukung pairing, buka panel **Daftar agent → Tambah agent**. Masukkan label device, pilih Hermes + Codex jika keduanya akan berjalan pada device yang sama, lalu masukkan kunci admin server secara lokal. Modal menghasilkan Markdown installasi dan token device khusus.
+
+Token device berbeda dari `OFFICE_API_TOKEN` utama. Token ini boleh dipakai bersama oleh Hermes dan Codex pada satu device, tetap memiliki `clientId` provider yang berbeda, dan dapat dicabut tanpa mengubah token device lain. Token plaintext hanya dikembalikan saat dibuat; registry server menyimpan hash-nya di `OFFICE_DATA_DIR/device-tokens.json`.
+
+Jangan menaruh token admin atau token device di URL, repository, screenshot, atau issue. Jika token device bocor, cabut token tersebut melalui endpoint admin dan buat pairing baru.
+
 Bila ingin config terpisah, set `LITTLE_OFFICE_CLIENT_CONFIG` ke path yang sama ketika memasang dan menjalankan Hermes. File env dapat dipilih dengan `--env-file` saat install atau `LITTLE_OFFICE_ENV_FILE` saat runtime. Environment `LITTLE_OFFICE_URL`, `LITTLE_OFFICE_API_TOKEN`, dan opsional `LITTLE_OFFICE_CLIENT_ID` mengoverride file env/config. Hindari menaruh token pada argumen command, URL, atau variabel `VITE_*`.
 
 ## 3. Gunakan Hermes seperti biasa

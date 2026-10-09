@@ -10,3 +10,4 @@ dist-server/
 client.json
 *.previous
 .DS_Store
+.little-office-device-tokens.json
