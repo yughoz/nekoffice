@@ -129,4 +129,4 @@ hermes plugins validate integrations/hermes/little-office-bridge --json
 
 Tes mencakup autentikasi, SSE, batas request, identitas multi-mesin, session yang dilanjutkan, heartbeat terputus, clock skew, client HTTP, retry dan shutdown client tanpa menghambat Hermes. Pemasangan lokal dan hook dibahas di [panduan Hermes](HERMES-BRIDGE.md).
 
-Verifikasi saat implementasi: 26 tes lulus, build browser/server lulus, plugin lolos validator resmi Hermes, dan client Python berhasil mengirim dua identitas mesin ke server build yang sebenarnya melalui HTTP lokal. Konfigurasi Compose lolos `docker compose config`; image Docker belum berhasil dibuild karena daemon Docker pada mesin pengujian tidak sedang berjalan.
+Verifikasi saat implementasi: 26 tes lulus, build browser/server lulus, plugin lolos validator resmi Hermes, dan client Python berhasil mengirim dua identitas mesin ke server build yang sebenarnya melalui HTTP lokal. Image Docker kemudian berhasil dibuild dan dijalankan pada VPS; HTTPS, autentikasi dan SSE domain publik sudah terverifikasi. Lihat [deployment live](DEPLOYMENT.md).

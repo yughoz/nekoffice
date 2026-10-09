@@ -1,5 +1,7 @@
 # Little Office — tampilan untuk agent lu
 
+Live di **[office.nekoding.xyz](https://office.nekoding.xyz/)**. Lihat [catatan deployment dan operasi VPS](docs/DEPLOYMENT.md).
+
 **Server pusat + client Hermes sudah tersedia.** Server menyajikan kantor dan API; tiap mesin Hermes hanya menjalankan plugin client yang mengirim status lewat HTTP dengan token. Satu session induk = satu orang, nama dari folder kerja, subagent digabung ke induknya. Ikuti [panduan server dan client](docs/SERVER-CLIENT.md) untuk setup dan deployment Docker.
 
 | Bagian | Source | Dijalankan di |
