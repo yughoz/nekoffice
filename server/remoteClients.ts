@@ -27,7 +27,8 @@ export class RemoteClients {
    if(!object(row)||typeof row.active!=='boolean'||typeof row.updatedAt!=='number'||!Number.isSafeInteger(row.updatedAt)||row.updatedAt<0)throw new EventError('Invalid session metadata.');
    const event=parseEvent({type:'agent.upsert',agent:row.agent});
    if(event.type!=='agent.upsert'||!new RegExp('^'+this.kind+'-[a-f0-9]{24}$').test(event.agent.id)||!event.agent.name||!event.agent.role||!event.agent.status)throw new EventError(`Expected a named ${this.kind} session.`);
-   const agent:AgentPatch={...event.agent,id:this.kind+'-'+createHash('sha256').update(clientId+'\0'+event.agent.id).digest('hex').slice(0,24),parentId:null,progress:null,provider:this.kind,machineId:clientId,machineLabel,bridgeVersion,avatarStyle:typeof event.agent.avatarStyle==='number'?event.agent.avatarStyle:createHash('sha256').update(clientId+'\0style\0'+event.agent.id).digest().readUInt8(0)%16};
+   const namespace=(value:string)=>this.kind+'-'+createHash('sha256').update(clientId+'\0'+value).digest('hex').slice(0,24);
+   const agent:AgentPatch={...event.agent,id:namespace(event.agent.id),parentId:event.agent.parentId?namespace(event.agent.parentId):null,progress:null,provider:this.kind,machineId:clientId,machineLabel,bridgeVersion,avatarStyle:typeof event.agent.avatarStyle==='number'?event.agent.avatarStyle:createHash('sha256').update(clientId+'\0style\0'+event.agent.id).digest().readUInt8(0)%16};
    const old=previous?.sessions.find(s=>s.agent.id===agent.id);
    const unchanged=old?.updatedAt===row.updatedAt&&old.active===row.active&&JSON.stringify(old.agent)===JSON.stringify(agent);
    return {agent,active:row.active,updatedAt:row.updatedAt,changedAt:unchanged?old!.changedAt:now};

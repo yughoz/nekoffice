@@ -29,17 +29,22 @@ class BridgeTests(unittest.TestCase):
         self.assertEqual(len(observer.snapshot()), 2)
         self.assertNotEqual(observer.snapshot()[0]['agent']['id'], observer.snapshot()[1]['agent']['id'])
 
-    def test_child_activity_keeps_parent_identity_and_child_finish_does_not_exit(self):
+    def test_child_activity_has_its_own_avatar_and_child_finish_does_not_exit_parent(self):
         observer = self.observer()
         observer.observe('pre_llm_call', {'session_id':'parent', 'platform':'telegram', 'cwd':'/work/channel'})
         observer.observe('subagent_start', {'parent_session_id':'parent', 'child_session_id':'child', 'cwd':'/work/other'})
         observer.observe('pre_llm_call', {'session_id':'child', 'parent_session_id':'parent', 'platform':'cli', 'cwd':'/work/other'})
         observer.observe('on_session_end', {'session_id':'child', 'completed':True})
         snapshot = observer.snapshot()
-        self.assertEqual(len(snapshot), 1)
-        self.assertTrue(snapshot[0]['active'])
-        self.assertEqual(snapshot[0]['agent']['name'], 'channel')
-        self.assertEqual(snapshot[0]['agent']['role'], 'Hermes · Telegram')
+        self.assertEqual(len(snapshot), 2)
+        parent = next(row for row in snapshot if row['agent']['parentId'] is None)
+        child = next(row for row in snapshot if row['agent']['parentId'] is not None)
+        self.assertTrue(parent['active'])
+        self.assertEqual(parent['agent']['name'], 'channel')
+        self.assertEqual(parent['agent']['role'], 'Hermes · Telegram')
+        self.assertEqual(child['agent']['parentId'], parent['agent']['id'])
+        self.assertFalse(child['active'])
+        self.assertEqual(child['agent']['role'], 'Hermes · Subagent')
 
     def test_sensitive_payload_fields_never_enter_telemetry(self):
         observer = self.observer()

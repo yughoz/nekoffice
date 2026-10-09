@@ -11,3 +11,16 @@ it('keeps Hermes and Codex independent on a shared store and rejects the wrong p
  expect(()=>codex.ingest({...packet('hermes'),sequence:2})).toThrow('codex');
  expect(store.get().agents).toHaveLength(2);
 });
+
+it('keeps a remote subagent beside its namespaced parent',()=>{
+ const store=new OfficeStore(),codex=new RemoteClients(store,()=>{},()=>100,'codex');
+ const packet={version:1,clientId:'machine',producerId:'producer',sequence:1,sessions:[
+  {agent:{id:'codex-'+'a'.repeat(24),name:'project',role:'Codex · Desktop / IDE',team:'production',status:'working',task:'Main'},active:true,updatedAt:1},
+  {agent:{id:'codex-'+'b'.repeat(24),name:'project · subagent',role:'Codex · Subagent',team:'production',status:'working',task:'Child',parentId:'codex-'+'a'.repeat(24)},active:true,updatedAt:1}
+ ]};
+ codex.ingest(packet);
+ const agents=store.get().agents;
+ expect(agents).toHaveLength(2);
+ const parent=agents.find(agent=>!agent.parentId),child=agents.find(agent=>agent.parentId);
+ expect(child?.parentId).toBe(parent?.id);
+});

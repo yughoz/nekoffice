@@ -220,32 +220,28 @@ class Observer:
                 del self.tails[path]
         children = {}
         for session in sessions.values():
-            if not session.child or session.ignored or not session.active:
+            if not session.child or session.ignored:
                 continue
             parent, visited = session.parent, {session.id}
             while parent in sessions and sessions[parent].child and parent not in visited:
                 visited.add(parent)
                 parent = sessions[parent].parent
             if parent in sessions and not sessions[parent].child:
-                children.setdefault(parent, []).append(session)
-        present = set()
-        for identity, root in sessions.items():
-            if root.child or root.ignored:
-                continue  # Orphan subagents and approval guardians never become people.
-            workers = children.get(identity, [])
-            active = root.active or bool(workers)
-            if not active and identity not in self.visible:
-                continue  # Completed sessions at startup never enter the office.
-            latest = max(([root] if root.active else []) + workers, key=lambda s: s.updated) if active else root
-            status, task = (latest.status, latest.task) if active else ('done', root.task)
-            if workers and latest is not root:
-                task = 'Subagent: ' + task
-            row = {'agent': {'id': 'codex-' + hashlib.sha256(identity.encode()).hexdigest()[:24],
-                             'name': root.name, 'role': root.role, 'team': 'production',
-                             'status': status, 'task': task, 'parentId': None, 'progress': None,
-                             'projectName': root.name, 'projectKey': hashlib.sha256((root.name+'\0'+identity).encode()).hexdigest()[:16],
-                             'activityCode': latest.activity_code, 'provider': 'codex'},
-                   'active': active, 'updatedAt': latest.updated}
+                # Keep an observed child visible long enough to animate its exit.
+                if session.active or session.id in self.visible:
+                    children.setdefault(parent, []).append(session)
+
+        def office_id(identity):
+            return 'codex-' + hashlib.sha256(identity.encode()).hexdigest()[:24]
+
+        def publish(identity, session, active, parent_id=None, name=None, role=None, task=None, status=None, activity=None):
+            row = {'agent': {'id': office_id(identity),
+                             'name': name or session.name, 'role': role or session.role, 'team': 'production',
+                             'status': status or session.status, 'task': task if task is not None else session.task,
+                             'parentId': parent_id, 'progress': None,
+                             'projectName': session.name, 'projectKey': hashlib.sha256((session.name+'\0'+identity).encode()).hexdigest()[:16],
+                             'activityCode': activity or session.activity_code, 'provider': 'codex'},
+                   'active': active, 'updatedAt': session.updated}
             previous = self.visible.get(identity)
             if previous:
                 row['updatedAt'] = max(row['updatedAt'], previous['row']['updatedAt'])
@@ -255,6 +251,29 @@ class Observer:
             inactive = None if active else (previous['inactive'] if previous and previous['inactive'] is not None else now)
             self.visible[identity] = {'row': row, 'inactive': inactive}
             present.add(identity)
+
+        present = set()
+        for identity, root in sessions.items():
+            if root.child or root.ignored:
+                continue  # Orphan subagents and approval guardians never become people.
+            workers = children.get(identity, [])
+            active = root.active or any(worker.active for worker in workers)
+            if not active and identity not in self.visible:
+                continue  # Completed sessions at startup never enter the office.
+            root_id = office_id(identity)
+            if root.active:
+                publish(identity, root, True, task=root.task, status=root.status, activity=root.activity_code)
+            elif workers and any(worker.active for worker in workers):
+                latest = max((worker for worker in workers if worker.active), key=lambda worker: worker.updated)
+                publish(identity, root, True, task='Mendampingi subagent', status='working', activity='command')
+            else:
+                publish(identity, root, False, task=root.task, status='done', activity='generic')
+            for child in workers:
+                child_name = child.name if child.name != root.name else f'{root.name} · subagent'
+                if len(child_name) > 48:
+                    child_name = child_name[:48].rstrip()
+                publish(child.id, child, child.active, parent_id=root_id, name=child_name,
+                        role='Codex · Subagent', task=child.task, status=child.status, activity=child.activity_code)
         for identity, entry in list(self.visible.items()):
             if identity not in present and entry['row']['active']:
                 entry['row']['active'] = False

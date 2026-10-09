@@ -80,39 +80,43 @@ class SessionObserver:
         now = int(time.time()*1000)
         with self.lock:
             parent = str(payload.get('parent_session_id') or '')
-            child = str(payload.get('child_session_id') or '')
+            child = str(payload.get('child_session_id') or payload.get('child_subagent_id') or '')
+            session_id = str(payload.get('session_id') or '')
             if event == 'subagent_start' and parent and child:
-                self.parents[child] = self._root(parent)
-                if payload.get('child_subagent_id'):
-                    self.parents[str(payload['child_subagent_id'])] = self._root(parent)
+                self.parents[child] = parent
+            elif event == 'subagent_stop' and parent and child:
+                self.parents[child] = parent
             # Hermes also supplies parent_session_id directly on child turn hooks.
-            if not event.startswith('subagent_') and parent and payload.get('session_id'):
-                self.parents[str(payload['session_id'])] = self._root(parent)
-            raw = parent if event.startswith('subagent_') else str(payload.get('session_id') or '')
+            elif parent and session_id:
+                self.parents[session_id] = parent
+            raw = child if event.startswith('subagent_') and child else session_id
             if not raw and payload.get('task_id'):
                 raw = self.task_sessions.get(str(payload['task_id']), '')
+            if not raw and event == 'subagent_start':
+                raw = child
             if not raw:
                 return
             root = self._root(raw)
             is_child = raw != root
             if payload.get('task_id'):
-                self.task_sessions[str(payload['task_id'])] = root
+                self.task_sessions[str(payload['task_id'])] = raw
             if event in ('on_session_finalize', 'on_session_reset'):
-                root = self._root(str(payload.get('old_session_id') or root))
-            previous = self.sessions.get(root)
-            terminal = event in ('post_llm_call', 'on_session_end', 'on_session_finalize', 'on_session_reset')
-            # Finishing a child never sends its parent home.
-            if terminal and is_child:
-                return
-            if terminal and not previous:
+                raw = str(payload.get('old_session_id') or raw)
+                root = self._root(raw)
+                is_child = raw != root
+            previous = self.sessions.get(raw)
+            parent_state = self.sessions.get(root)
+            terminal = event in ('post_llm_call', 'on_session_end', 'on_session_finalize', 'on_session_reset', 'subagent_stop')
+            if terminal and not previous and event != 'subagent_stop':
                 return
             platform = str(payload.get('platform') or payload.get('surface') or '')
-            if previous and (is_child or event.startswith('subagent_')):
-                platform = previous.get('surface', platform)
-            if platform == 'gateway' and previous:
-                platform = previous.get('surface', platform)
-            if not platform and previous:
-                platform = previous.get('surface', '')
+            inherited = previous or parent_state
+            if inherited and (is_child or event.startswith('subagent_')):
+                platform = inherited.get('surface', platform)
+            if platform == 'gateway' and inherited:
+                platform = inherited.get('surface', platform)
+            if not platform and inherited:
+                platform = inherited.get('surface', '')
             surface = SURFACES.get(platform, platform[:24] or 'Hermes')
             status, task = 'working', 'Hermes sedang bekerja'
             if event == 'pre_api_request':
@@ -127,7 +131,7 @@ class SessionObserver:
             elif event == 'subagent_start':
                 task = 'Subagent sedang bekerja'
             elif event == 'subagent_stop':
-                task = 'Subagent selesai; melanjutkan pekerjaan'
+                status, task = 'done', 'Subagent selesai; melanjutkan pekerjaan'
             elif terminal:
                 status, task = 'done', 'Pekerjaan selesai'
                 if payload.get('failed'):
@@ -136,14 +140,19 @@ class SessionObserver:
                     task = 'Session dihentikan'
                 elif event in ('on_session_finalize', 'on_session_reset'):
                     task = 'Session tidak aktif'
-            # A child can work in a different folder; keep the parent's project identity.
-            name = previous['agent']['name'] if previous else 'Hermes'
+            # A child keeps its own identity and is linked to the root for the viewer.
+            name = previous['agent']['name'] if previous else (parent_state['agent']['name'] if parent_state else 'Hermes')
             if cwd and not is_child and not event.startswith('subagent_'):
                 name = project_name(cwd)
-            agent = {'id': self._id(root), 'name': name,
-                     'role': 'Hermes · '+surface, 'team': 'research',
-                     'status': status, 'task': task, 'progress': None}
-            self.sessions[root] = {'agent': agent, 'surface': platform,
+            if is_child and cwd and not previous:
+                child_name = project_name(cwd)
+                name = child_name if child_name != (parent_state or {}).get('agent', {}).get('name') else child_name+' · subagent'
+            if is_child and len(name) < 48 and name == (parent_state or {}).get('agent', {}).get('name'):
+                name += ' · subagent'
+            agent = {'id': self._id(raw), 'name': name,
+                     'role': 'Hermes · Subagent' if is_child else 'Hermes · '+surface, 'team': 'research',
+                     'status': status, 'task': task, 'parentId': self._id(root) if is_child else None, 'progress': None}
+            self.sessions[raw] = {'agent': agent, 'surface': platform,
                                    'active': not terminal, 'updatedAt': now}
             # Bound telemetry memory; prefer recent sessions.
             if len(self.sessions)>128:
@@ -156,7 +165,25 @@ class SessionObserver:
 
     def snapshot(self):
         with self.lock:
-            return json.loads(json.dumps(list(self.sessions.values())))
+            rows = []
+            children_by_root = {}
+            for session, value in self.sessions.items():
+                root = self._root(session)
+                if session != root and value['active']:
+                    children_by_root.setdefault(root, []).append(value)
+            for session, value in self.sessions.items():
+                if session != self._root(session):
+                    rows.append(value)
+                    continue
+                if children_by_root.get(session) and not value['active']:
+                    parent = json.loads(json.dumps(value))
+                    parent['active'] = True
+                    parent['agent']['status'] = 'working'
+                    parent['agent']['task'] = 'Mendampingi subagent'
+                    rows.append(parent)
+                else:
+                    rows.append(value)
+            return json.loads(json.dumps(rows))
 
     def finish(self):
         with self.lock:
