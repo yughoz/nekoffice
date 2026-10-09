@@ -1,7 +1,7 @@
 import Phaser from 'phaser';
 import {roomInfo,statusInfo,type OfficeAgent,type OfficeSnapshot,type Room} from './officeModel';
 import {findPath,type Point} from './navigation';
-import {columns,seat,station,seatCount,doorway,agentSeed} from './officeLayout';
+import {seat,station,seatCount,doorway,agentSeed,subagentPosition} from './officeLayout';
 import {drawOpenOffice,drawScreen} from './openOfficeArt';
 interface AtlasManifest {frame_layout:{rows:Record<string,{x:number;y:number;w:number;h:number}[]>};animation:{rows:Record<string,{fps:number;loop:boolean}>};}
 interface VisualAgent {root:Phaser.GameObjects.Container;body:Phaser.GameObjects.Sprite;ring:Phaser.GameObjects.Ellipse;badge:Phaser.GameObjects.Arc;name:Phaser.GameObjects.Text;bubble:Phaser.GameObjects.Text;path:Point[];action:string;signature:string;team:Room;hands:Phaser.GameObjects.Container[];chair:Phaser.GameObjects.Container;seatIndex:number;subagent:boolean;phase:'entering'|'working'|'leaving'|'gone';pace:number;}
@@ -26,12 +26,8 @@ export class OfficeScene extends Phaser.Scene {
  follow(id:string){const avatar=this.avatars.get(id);if(!avatar||avatar.phase==='gone')return;this.followed=id;this.cameras.main.startFollow(avatar.root,true,.08,.08);this.cameras.main.setZoom(Math.max(this.fitZoom*1.65,this.cameras.main.zoom));this.bridge.followChanged(true);}
  stopFollow(){this.cameras.main.stopFollow();this.followed=undefined;this.bridge.followChanged(false);}
  rebuildOffice(count:number){this.art?.group.destroy(true);this.capacity=seatCount(count);this.art=drawOpenOffice(this,count);this.screenSignature='';this.fit();}
- stationIndex(agent:OfficeAgent){if(!this.locations.has(agent.id)){const used=new Set(this.locations.values());let preferred:number|undefined;
-   if(agent.parentId){let parentIndex=this.locations.get(agent.parentId);if(parentIndex===undefined){const parent=this.bridge.view.snapshot.agents.find(candidate=>candidate.id===agent.parentId);if(parent&&parent.id!==agent.id)parentIndex=this.stationIndex(parent);}
-    if(parentIndex!==undefined){const row=Math.floor(parentIndex/columns);const neighbors=[parentIndex+1,parentIndex-1,parentIndex+columns,parentIndex-columns];preferred=neighbors.find(candidate=>candidate>=0&&candidate<this.capacity&&!used.has(candidate)&&(candidate===parentIndex+columns||candidate===parentIndex-columns||Math.floor(candidate/columns)===row));}}
-   if(preferred===undefined){const explicit=agent.seatIndex;preferred=Number.isInteger(explicit)&&explicit!<64&&!used.has(explicit as number)?explicit as number:0;}
-   let i=preferred;while(used.has(i))i++;this.locations.set(agent.id,i);}return this.locations.get(agent.id)!;}
- home(agent:OfficeAgent){return agent.position||seat(this.stationIndex(agent));}
+ stationIndex(agent:OfficeAgent):number{if(agent.parentId){const parent=this.bridge.view.snapshot.agents.find(candidate=>candidate.id===agent.parentId);return parent&&parent.id!==agent.id?this.stationIndex(parent):0;}if(!this.locations.has(agent.id)){const used=new Set(this.locations.values());const explicit=agent.seatIndex;let i=Number.isInteger(explicit)&&explicit!<64&&!used.has(explicit as number)?explicit as number:0;while(used.has(i))i++;this.locations.set(agent.id,i);}return this.locations.get(agent.id)!;}
+ home(agent:OfficeAgent){if(agent.parentId){const parent=this.bridge.view.snapshot.agents.find(candidate=>candidate.id===agent.parentId);const parentHome=parent?(parent.position||seat(this.stationIndex(parent))):seat(0);const siblings=this.bridge.view.snapshot.agents.filter(candidate=>candidate.parentId===agent.parentId).sort((a,b)=>a.id.localeCompare(b.id));return subagentPosition(parentHome,Math.max(0,siblings.findIndex(candidate=>candidate.id===agent.id)));}return agent.position||seat(this.stationIndex(agent));}
  addAgent(agent:OfficeAgent){const p=doorway(this.capacity);p.x+=agentSeed(agent.id)%17-8;const subagent=Boolean(agent.parentId),root=this.add.container(p.x,p.y),color=Phaser.Display.Color.HexStringToColor(roomInfo[agent.team].color).color;
   const shadow=this.add.ellipse(0,-2,subagent?19:23,subagent?6:7,0x382718,.18),ring=this.add.ellipse(0,-2,subagent?26:30,subagent?9:11).setStrokeStyle(2,color).setVisible(false),body=this.add.sprite(0,3,`worker-${agent.team}`,'idle-0').setOrigin(.5,1).setScale(subagent?.72:.85),badge=this.add.circle(13,-30,2.6,statusInfo[agent.status].color).setStrokeStyle(1,0xfffaf0),name=this.add.text(0,7,agent.name,{fontFamily:'Arial, sans-serif',fontSize:subagent?'8px':'10px',color:'#514833',backgroundColor:'#fff9e9dd',padding:{x:4,y:2}}).setOrigin(.5,0),bubble=this.add.text(0,-58,'',{fontFamily:'Arial, sans-serif',fontSize:'8px',color:'#657452',backgroundColor:'#fffef2ee',padding:{x:5,y:3},wordWrap:{width:104}}).setOrigin(.5,1).setVisible(false);
   if(agent.avatarStyle!==undefined)body.setTint([0xffffff,0xffeee3,0xe7f0ff,0xf3e9ff,0xfff1c7,0xe5f5e8,0xffe6f0,0xe5f0f5][agent.avatarStyle%8]);
@@ -42,9 +38,9 @@ export class OfficeScene extends Phaser.Scene {
  update(_time:number,delta:number){if(!this.manifest)return;const view=this.bridge.view;
   if(view.snapshot.epoch!==this.epoch){this.epoch=view.snapshot.epoch;for(const a of this.avatars.values())a.root.destroy();this.avatars.clear();this.locations.clear();this.rebuildOffice(view.snapshot.agents.length);}
   for(const [id,a] of this.avatars)if(!view.snapshot.agents.some(agent=>agent.id===id)){a.root.destroy();this.avatars.delete(id);this.locations.delete(id);if(this.followed===id)this.stopFollow();}
-  const count=Math.max(view.snapshot.agents.length,...[...this.locations.values()].map(i=>i+1));if(seatCount(count)!==this.capacity)this.rebuildOffice(count);
+  const count=Math.max(view.snapshot.agents.filter(agent=>!agent.parentId).length,...[...this.locations.values()].map(i=>i+1));if(seatCount(count)!==this.capacity)this.rebuildOffice(count);
   if(!view.paused&&!view.reducedMotion)this.motionTime+=delta;
-  const occupied=new Map(view.snapshot.agents.map(agent=>[this.stationIndex(agent),agent]));
+  const occupied=new Map(view.snapshot.agents.filter(agent=>!agent.parentId).map(agent=>[this.stationIndex(agent),agent]));
   const screenSignature=`${view.snapshot.epoch}/${view.snapshot.revision}/${Math.floor(this.motionTime/180)}/${view.reducedMotion}/${[...this.avatars.values()].map(a=>`${a.phase}/${a.path.length>0}`).join(',')}`;
   if(screenSignature!==this.screenSignature){this.screenSignature=screenSignature;this.art?.computers.forEach((computer,i)=>{const p=station(i),agent=occupied.get(i),a=agent&&this.avatars.get(agent.id),active=agent?.status==='working'&&!agent.position&&a?.phase==='working'&&!a.path.length;drawScreen(computer,p.x,p.y,!!active,view.reducedMotion?0:Math.floor(this.motionTime/180)+i*3);});}
   for(const agent of view.snapshot.agents){let a=this.avatars.get(agent.id);if(a&&a.team!==agent.team){a.root.destroy();this.avatars.delete(agent.id);a=undefined;}a??=this.addAgent(agent);
@@ -62,11 +58,12 @@ export class OfficeScene extends Phaser.Scene {
    if(!view.paused){const remaining=Math.hypot(a.root.x-goal.x,a.root.y-goal.y);a.root.setAlpha(a.phase==='leaving'?Math.min(1,remaining/18):Math.min(1,a.root.alpha+delta/350));}
    if(!a.path.length&&a.phase==='leaving'){a.phase='gone';a.root.setVisible(false);if(this.followed===agent.id)this.stopFollow();continue;}
    if(!a.path.length&&a.phase==='entering')a.phase='working';
-   const seated=a.phase==='working'&&!agent.position&&!a.path.length&&Math.hypot(a.root.x-home.x,a.root.y-home.y)<9&&agent.status!=='done';
+   const seated=!agent.parentId&&a.phase==='working'&&!agent.position&&!a.path.length&&Math.hypot(a.root.x-home.x,a.root.y-home.y)<9&&agent.status!=='done';
    const typing=seated&&agent.status==='working';a.chair.setVisible(seated);a.body.setCrop(0,0,48,seated?38:48);
    if(seated){animation='seated';a.body.anims.stop();a.body.setFrame('walk_up-0');a.body.setFlipX(false);a.body.setY(3+(typing&&!view.reducedMotion?Math.floor(this.motionTime/320+a.seatIndex)%2:0));}else a.body.setY(3);
    const activity=agent.activityCode==='thinking'||agent.status==='thinking'?'Berpikir':agent.activityCode==='waiting'||agent.status==='waiting'?'Menunggu':agent.activityCode==='test'?'Menjalankan tes':agent.activityCode==='edit'?'Mengubah file':agent.activityCode==='research'?'Membaca referensi':agent.activityCode==='command'?'Menjalankan perintah':agent.status==='error'?'Perlu perhatian':agent.status==='working'?'Bekerja':'';
-   a.bubble.setText(activity);a.bubble.setVisible(seated&&Boolean(activity)&&!view.reducedMotion);a.bubble.setY(agent.status==='waiting'&&!view.reducedMotion? -61 : -58);
+   const standingAtHome=Boolean(agent.parentId)&&a.phase==='working'&&!a.path.length&&Math.hypot(a.root.x-home.x,a.root.y-home.y)<9;
+   a.bubble.setText(activity);a.bubble.setVisible((seated||standingAtHome)&&Boolean(activity)&&!view.reducedMotion);a.bubble.setY(agent.parentId? -54 : agent.status==='waiting'&&!view.reducedMotion? -61 : -58);
    a.hands.forEach((hand,i)=>{hand.setVisible(typing);hand.y=-25+(typing&&!view.reducedMotion?Math.floor(this.motionTime/110+a.seatIndex+i)%2*2:0);});
    if(animation!==a.action){a.action=animation;if(animation!=='seated')a.body.play(`${agent.team}-${animation}`,true);}if(!seated){if(view.paused||view.reducedMotion)a.body.anims.pause();else a.body.anims.resume();}a.name.setText(agent.name);a.badge.setFillStyle(statusInfo[agent.status].color);a.ring.setVisible(view.selected===agent.id);a.root.setDepth(a.root.y+50);
   }

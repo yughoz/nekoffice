@@ -34,7 +34,7 @@ v0.3 membuat hubungan parent–subagent terlihat di kantor lokal. Satu agent uta
 ## Perilaku visual
 
 1. Parent mendapat kursi seperti biasa.
-2. Child mencari kursi kiri/kanan pada baris yang sama, lalu depan/belakang jika kursi samping penuh.
+2. Child tidak mengambil kursi. Ia berdiri di samping dan sekitar kaki meja parent memakai slot offset deterministik; lima child pertama mendapat posisi yang mudah dibaca.
 3. Posisi dipilih dari `parentId`, bukan dari urutan array snapshot, sehingga refresh tidak memindahkan kelompok.
 4. Child memakai avatar lebih kecil dan label `Subagent` di daftar/detail, sementara bubble aktivitas tetap mengikuti status child.
 5. Jika child selesai, hanya child yang berjalan ke pintu. Parent tetap duduk selama masih aktif atau masih mendampingi child aktif.
@@ -48,6 +48,7 @@ v0.3 membuat hubungan parent–subagent terlihat di kantor lokal. Satu agent uta
 - Unit test server memastikan parent ID remote dipetakan ke namespace provider dan child tidak ditimpa parent.
 - Build dan test web tetap dijalankan.
 - Preview terakhir memakai `npm run dev`/Live API lokal; perubahan belum dikirim ke VPS atau domain publik.
+- Fixture lima subagent dapat dijalankan dengan `OFFICE_LOCAL_API_TOKEN=<token-uji> python3 scripts/local-v03-demo.py --subagents 5`.
 
 ![Uji lokal parent dan subagent](screenshots/v03-local-parent-subagent.png)
 
