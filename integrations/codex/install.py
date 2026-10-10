@@ -41,6 +41,8 @@ def main():
     config['apiToken'] = values.get('LITTLE_OFFICE_API_TOKEN') or config.get('apiToken') or getpass.getpass('Office API token: ')
     config['clientId'] = values.get('LITTLE_OFFICE_CLIENT_ID') or config.get('clientId') or uuid.uuid4().hex
     config['machineLabel'] = values.get('LITTLE_OFFICE_MACHINE_LABEL') or config.get('machineLabel', '')
+    config['machineLabelMode'] = values.get('LITTLE_OFFICE_MACHINE_LABEL_MODE') or config.get('machineLabelMode', 'hidden')
+    config['nameMode'] = values.get('LITTLE_OFFICE_NAME_MODE') or config.get('nameMode', 'alias')
     config['envFile'] = str(env_path)
     Transport(config)  # Validate before mutating the installation.
     if args.autostart:

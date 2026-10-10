@@ -11,7 +11,8 @@ spec.loader.exec_module(bridge)
 
 class BridgeTests(unittest.TestCase):
     def observer(self):
-        return bridge.SessionObserver('/profile/default', lambda payload: payload.get('cwd'))
+        return bridge.SessionObserver('/profile/default', lambda payload: payload.get('cwd'),
+                                      settings={'LITTLE_OFFICE_NAME_MODE': 'project'})
 
     def test_one_avatar_per_session_with_project_name_and_stable_resume(self):
         observer = self.observer()
@@ -75,6 +76,23 @@ class BridgeTests(unittest.TestCase):
         self.assertEqual(len(observer.snapshot()), 3)
         self.assertEqual([row['agent']['role'] for row in observer.snapshot()],
                          ['Hermes · Terminal', 'Hermes · Desktop', 'Hermes · Telegram'])
+
+    def test_public_name_modes_sanitize_project_identity(self):
+        alias = bridge.SessionObserver('/profile/alias', lambda payload: payload.get('cwd'),
+                                       settings={'LITTLE_OFFICE_NAME_MODE': 'alias', 'LITTLE_OFFICE_NAME_SALT': 'test-salt'})
+        alias.observe('pre_llm_call', {'session_id': 'alias', 'cwd': '/work/private-project'})
+        row = alias.snapshot()[0]['agent']
+        self.assertRegex(row['name'], r'^[A-Za-z]+-[0-9A-F]{4}$')
+        self.assertNotIn('private-project', json.dumps(row))
+        self.assertEqual(row['projectName'], row['name'])
+
+        hidden = bridge.SessionObserver('/profile/hidden', lambda payload: payload.get('cwd'),
+                                        settings={'LITTLE_OFFICE_NAME_MODE': 'hidden'})
+        hidden.observe('pre_llm_call', {'session_id': 'hidden', 'cwd': '/work/private-project'})
+        hidden_row = hidden.snapshot()[0]['agent']
+        self.assertEqual(hidden_row['name'], 'Hermes Agent')
+        self.assertNotIn('projectName', hidden_row)
+        self.assertNotIn('private-project', json.dumps(hidden_row))
 
 
 if __name__ == '__main__':

@@ -52,14 +52,18 @@ class Transport:
         if not isinstance(identity, str) or not re.fullmatch(r'[a-zA-Z0-9_-]{1,80}', identity):
             raise ValueError('Invalid client ID.')
         self.url, self.token, self.identity = url.rstrip('/') + '/api/codex/heartbeat', token, identity
-        self.machine_label, self.bridge_version = str(config.get('machineLabel') or ''), str(config.get('bridgeVersion') or 'codex-observer/0.2')
+        self.machine_label = str(config.get('machineLabel') or '')
+        self.machine_label_mode = str(config.get('LITTLE_OFFICE_MACHINE_LABEL_MODE') or config.get('machineLabelMode') or 'hidden').strip().lower()
+        self.bridge_version = str(config.get('bridgeVersion') or 'codex-observer/0.2')
         self.sequence, self.producer = 0, uuid.uuid4().hex
         self.opener = build_opener(NoRedirect())
 
     def send(self, sessions):
         self.sequence += 1
         body = {'version': 1, 'clientId': self.identity, 'producerId': self.producer,
-                'sequence': self.sequence, 'sessions': sessions, 'machineLabel': self.machine_label,
+                'sequence': self.sequence, 'sessions': sessions,
+                'machineLabel': self.machine_label if self.machine_label_mode == 'show' else '',
+                'machineLabelMode': 'show' if self.machine_label_mode == 'show' else 'hidden',
                 'bridgeVersion': self.bridge_version}
         data = json.dumps(body, ensure_ascii=False).encode()
         if len(data) > 65536:
@@ -102,8 +106,12 @@ def run(args):
         config['apiToken'] = values.get('LITTLE_OFFICE_API_TOKEN', config.get('apiToken', ''))
         config['clientId'] = values.get('LITTLE_OFFICE_CLIENT_ID', config.get('clientId', ''))
         config['machineLabel'] = values.get('LITTLE_OFFICE_MACHINE_LABEL', config.get('machineLabel', ''))
+        config['machineLabelMode'] = values.get('LITTLE_OFFICE_MACHINE_LABEL_MODE', config.get('machineLabelMode', 'hidden'))
+        config['nameMode'] = values.get('LITTLE_OFFICE_NAME_MODE', config.get('nameMode', 'alias'))
         transport = Transport(config)
-        observer = Observer(args.home, stale_seconds=args.stale_seconds)
+        observer_settings = dict(config)
+        observer_settings.update(values)
+        observer = Observer(args.home, stale_seconds=args.stale_seconds, settings=observer_settings)
         running = True
 
         def stop(signum, frame):

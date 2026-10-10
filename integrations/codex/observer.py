@@ -4,8 +4,10 @@ Rollout JSONL is an internal format, tested with Codex 0.160.1. No model calls,
 session resumes, transcript writes, or Codex configuration changes are made.
 """
 import hashlib
+import hmac
 import json
 import re
+import secrets
 import time
 from dataclasses import dataclass, field
 from datetime import datetime
@@ -26,6 +28,70 @@ LABELS = {
     'AgentMessage': ('working', 'Menyusun jawaban'),
 }
 ACTIVITY = {'Reasoning': 'thinking', 'CommandExecution': 'command', 'FileChange': 'edit', 'McpToolCall': 'command', 'SubAgentActivity': 'command', 'ContextCompaction': 'thinking', 'ImageView': 'research', 'WebSearch': 'research', 'Extension': 'command', 'AgentMessage': 'thinking'}
+NAME_MODES = {'project', 'alias', 'random', 'hidden'}
+ALIAS_WORDS = ('Amber', 'Cedar', 'Clover', 'Moss', 'River', 'Sage', 'Willow', 'Pine', 'Meadow', 'Maple', 'Fern', 'Pebble')
+
+
+def normalize_name_mode(value):
+    value = str(value or '').strip().lower()
+    return value if value in NAME_MODES else 'alias'
+
+
+def _private_salt(path, supplied=''):
+    if supplied:
+        return str(supplied)
+    path = Path(path)
+    try:
+        path.parent.mkdir(parents=True, exist_ok=True, mode=0o700)
+        if path.exists():
+            value = path.read_text(encoding='utf-8').strip()
+            if value:
+                return value
+        value = secrets.token_hex(32)
+        descriptor = path.open('x')
+        try:
+            descriptor.write(value + '\n')
+        finally:
+            descriptor.close()
+        path.chmod(0o600)
+        return value
+    except (OSError, ValueError):
+        # Read-only homes still get a private per-install fallback. It is never sent.
+        return 'local-codex-name-salt'
+
+
+class NamePolicy:
+    def __init__(self, mode='alias', salt='', salt_path=None, provider='Codex'):
+        self.mode = normalize_name_mode(mode)
+        self.salt = _private_salt(salt_path, salt) if salt_path else (str(salt) or 'local-codex-name-salt')
+        self.provider = provider
+        self.random_names = {}
+
+    def _digest(self, value):
+        return hmac.new(self.salt.encode('utf-8'), str(value).encode('utf-8'), hashlib.sha256).hexdigest()
+
+    def public(self, raw, identity):
+        raw = str(raw or self.provider).strip()[:48] or self.provider
+        if self.mode == 'project':
+            return raw
+        if self.mode == 'hidden':
+            return self.provider + ' Agent'
+        if self.mode == 'random':
+            if identity not in self.random_names:
+                self.random_names[identity] = 'Agent-' + secrets.token_hex(3).upper()
+            return self.random_names[identity]
+        digest = self._digest(raw)
+        return f'{ALIAS_WORDS[int(digest[:2], 16) % len(ALIAS_WORDS)]}-{digest[2:6].upper()}'
+
+    def project_key(self, raw, identity):
+        if self.mode == 'hidden':
+            return None
+        value = str(raw or self.provider)
+        if self.mode == 'project':
+            return hashlib.sha256(value.encode('utf-8')).hexdigest()[:16]
+        if self.mode == 'random':
+            return hashlib.sha256((self.provider + '\0' + str(identity)).encode('utf-8')).hexdigest()[:16]
+        return self._digest(value)[:16]
 
 
 def millis(record, fallback):
@@ -179,11 +245,15 @@ class Tail:
 
 
 class Observer:
-    def __init__(self, home, now=None, stale_seconds=600, bootstrap_seconds=120):
+    def __init__(self, home, now=None, stale_seconds=600, bootstrap_seconds=120, settings=None):
         self.root = Path(home) / 'sessions'
         self.now = now or (lambda: int(time.time() * 1000))
         self.stale_ms = stale_seconds * 1000
         self.bootstrap_ms = bootstrap_seconds * 1000
+        settings = settings or {}
+        name_mode = settings.get('LITTLE_OFFICE_NAME_MODE') or settings.get('nameMode') or 'alias'
+        name_salt = settings.get('LITTLE_OFFICE_NAME_SALT') or settings.get('nameSalt') or ''
+        self.names = NamePolicy(name_mode, name_salt, Path(home) / 'nekoffice' / 'name-salt')
         self.tails = {}
         self.visible = {}
         self.next_discovery = 0
@@ -235,12 +305,18 @@ class Observer:
             return 'codex-' + hashlib.sha256(identity.encode()).hexdigest()[:24]
 
         def publish(identity, session, active, parent_id=None, name=None, role=None, task=None, status=None, activity=None):
-            row = {'agent': {'id': office_id(identity),
-                             'name': name or session.name, 'role': role or session.role, 'team': 'production',
-                             'status': status or session.status, 'task': task if task is not None else session.task,
-                             'parentId': parent_id, 'progress': None,
-                             'projectName': session.name, 'projectKey': hashlib.sha256((session.name+'\0'+identity).encode()).hexdigest()[:16],
-                             'activityCode': activity or session.activity_code, 'provider': 'codex'},
+            public_name = name or self.names.public(session.name, identity)
+            row_agent = {'id': office_id(identity),
+                         'name': public_name, 'role': role or session.role, 'team': 'production',
+                         'status': status or session.status, 'task': task if task is not None else session.task,
+                         'parentId': parent_id, 'progress': None,
+                         'activityCode': activity or session.activity_code, 'provider': 'codex'}
+            project_key = self.names.project_key(session.name, identity)
+            if self.names.mode != 'hidden':
+                row_agent['projectName'] = public_name
+                if project_key:
+                    row_agent['projectKey'] = project_key
+            row = {'agent': row_agent,
                    'active': active, 'updatedAt': session.updated}
             previous = self.visible.get(identity)
             if previous:
@@ -269,7 +345,9 @@ class Observer:
             else:
                 publish(identity, root, False, task=root.task, status='done', activity='generic')
             for child in workers:
-                child_name = child.name if child.name != root.name else f'{root.name} · subagent'
+                child_name = self.names.public(child.name, child.id)
+                if child_name == self.names.public(root.name, identity):
+                    child_name += ' · subagent'
                 if len(child_name) > 48:
                     child_name = child_name[:48].rstrip()
                 publish(child.id, child, child.active, parent_id=root_id, name=child_name,

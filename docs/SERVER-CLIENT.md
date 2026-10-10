@@ -44,7 +44,7 @@ docker compose logs -f office
 
 Docker menjalankan server sebagai user `node`, menyajikan build kantor dan API, serta melakukan health check. Vite dipakai untuk development; `npm start` adalah server produksi mandiri dan tidak membaca folder `.hermes` milik host.
 
-Dashboard dan endpoint baca menampilkan nama folder/status kepada orang yang dapat mengakses URL. Token melindungi semua endpoint **POST**; letakkan dashboard di jaringan privat atau di belakang autentikasi proxy jika hanya tim lu yang boleh melihatnya.
+Dashboard dan endpoint baca menampilkan nama publik/status kepada orang yang dapat mengakses URL. Client public sebaiknya memakai `LITTLE_OFFICE_NAME_MODE=alias` atau `hidden`; mode `project` tetap menampilkan basename folder. Token melindungi semua endpoint **POST**; letakkan dashboard di jaringan privat atau di belakang autentikasi proxy jika hanya tim lu yang boleh melihatnya.
 
 ## 2. Pasang client pada setiap mesin Hermes
 
@@ -59,6 +59,22 @@ python3 integrations/hermes/install_bridge.py --env-file .env
 ```
 
 `LITTLE_OFFICE_URL` dan `LITTLE_OFFICE_API_TOKEN` di `.env` menentukan server dan token client. Alternatifnya, URL dapat diberikan langsung dengan `--server`; token tetap diminta secara tersembunyi. File `.env` hanya berada di mesin client dan jangan dimasukkan ke Git.
+
+### Privasi nama project pada server public
+
+Client menyamarkan nama folder sebelum mengirim heartbeat. Pilih kebijakan di `.env`:
+
+```dotenv
+# Rekomendasi untuk server public: alias stabil seperti Moss-42.
+LITTLE_OFFICE_NAME_MODE=alias
+# project hanya untuk server private; random berganti tiap session; hidden tidak mengirim projectName.
+# LITTLE_OFFICE_NAME_MODE=project|alias|random|hidden
+LITTLE_OFFICE_MACHINE_LABEL_MODE=hidden
+# Hanya gunakan show bila label mesin aman ditampilkan.
+# LITTLE_OFFICE_MACHINE_LABEL_MODE=show
+```
+
+`alias` memakai salt lokal yang disimpan dengan permission `0600`, sehingga nama tetap konsisten di mesin yang sama tanpa mengirim nama project asli. `random` membuat alias baru untuk setiap session. `hidden` menampilkan `Hermes Agent` atau `Codex Agent` dan menghapus field project dari payload. `project` mengirim basename folder dan hanya cocok untuk jaringan private. Kebijakan ini berlaku di Hermes dan Codex sebelum request HTTP dibuat; UI server tidak menjadi lapisan privasi.
 
 Installer meminta token secara tersembunyi. Masukkan nilai `OFFICE_API_TOKEN` server. Config disimpan lokal dengan permission `0600` di `~/.hermes/plugins/little-office-bridge/client.json`; client ID stabil disimpan di `client-id`. Jangan salin ID itu ke mesin kedua: jalankan installer di mesin tersebut agar ID-nya berbeda. Tidak ada API key model yang diperlukan untuk bridge.
 
@@ -82,7 +98,7 @@ Token device berbeda dari `OFFICE_API_TOKEN` utama. Token ini boleh dipakai bers
 
 Jangan menaruh token admin atau token device di URL, repository, screenshot, atau issue. Jika token device bocor, cabut token tersebut melalui endpoint admin dan buat pairing baru.
 
-Bila ingin config terpisah, set `LITTLE_OFFICE_CLIENT_CONFIG` ke path yang sama ketika memasang dan menjalankan Hermes. File env dapat dipilih dengan `--env-file` saat install atau `LITTLE_OFFICE_ENV_FILE` saat runtime. Environment `LITTLE_OFFICE_URL`, `LITTLE_OFFICE_API_TOKEN`, dan opsional `LITTLE_OFFICE_CLIENT_ID` mengoverride file env/config. Hindari menaruh token pada argumen command, URL, atau variabel `VITE_*`.
+Bila ingin config terpisah, set `LITTLE_OFFICE_CLIENT_CONFIG` ke path yang sama ketika memasang dan menjalankan Hermes. File env dapat dipilih dengan `--env-file` saat install atau `LITTLE_OFFICE_ENV_FILE` saat runtime. Environment `LITTLE_OFFICE_URL`, `LITTLE_OFFICE_API_TOKEN`, `LITTLE_OFFICE_CLIENT_ID`, `LITTLE_OFFICE_NAME_MODE`, `LITTLE_OFFICE_NAME_SALT`, dan `LITTLE_OFFICE_MACHINE_LABEL_MODE` mengoverride file env/config. Hindari menaruh token pada argumen command, URL, atau variabel `VITE_*`.
 
 ## 3. Gunakan Hermes seperti biasa
 
@@ -92,7 +108,7 @@ Client berjalan di thread terpisah; timeout HTTP 3 detik dan retry bertahap samp
 
 Server menghitung liveness dari waktu heartbeat **diterima server**, bukan PID atau jam mesin client. Setelah 35 detik tanpa heartbeat, orang pulang. Data orang yang sudah pulang dibuang setelah 90 detik; heartbeat berulang tidak membuat pekerjaan selesai muncul kembali. Session yang aktif kembali mempertahankan ID orangnya. Batas tampilan 64 orang; session aktif tambahan menunggu slot kosong.
 
-Server menyimpan status saat ini di memori. Setelah restart server, client yang masih berjalan mengirim snapshot pada heartbeat berikutnya. Tidak ada penyimpanan riwayat prompt/hasil kerja. Metadata terdiri dari ID opaque, nama folder, platform, status, nama tool, dan timestamp; token hanya ada pada header autentikasi.
+Server menyimpan status saat ini di memori. Setelah restart server, client yang masih berjalan mengirim snapshot pada heartbeat berikutnya. Tidak ada penyimpanan riwayat prompt/hasil kerja. Metadata terdiri dari ID opaque, nama publik sesuai mode client, platform, status, nama tool, dan timestamp; token hanya ada pada header autentikasi.
 
 ## Endpoint dan cek koneksi
 

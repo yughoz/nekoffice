@@ -23,6 +23,8 @@ URL dan token dapat diletakkan di file `.env` lokal. Salin [contoh env client](.
 ```dotenv
 LITTLE_OFFICE_URL=https://office.nekoding.xyz
 LITTLE_OFFICE_API_TOKEN=token-server-lu
+LITTLE_OFFICE_NAME_MODE=alias
+LITTLE_OFFICE_MACHINE_LABEL_MODE=hidden
 ```
 
 ```sh
@@ -52,7 +54,9 @@ python3 integrations/codex/install.py --server https://office.nekoding.xyz
 python3 ~/.codex/nekoffice/client.py run
 ```
 
-Untuk menjalankan manual dengan file env yang berbeda, tambahkan `--env-file /path/ke/.env` atau set `LITTLE_OFFICE_ENV_FILE`. Pada macOS, installer menyimpan path env ke LaunchAgent sehingga service memakai URL/token yang sama setelah login. Environment process `LITTLE_OFFICE_URL`, `LITTLE_OFFICE_API_TOKEN`, `LITTLE_OFFICE_CLIENT_ID`, dan `LITTLE_OFFICE_MACHINE_LABEL` mengoverride nilai file.
+Untuk menjalankan manual dengan file env yang berbeda, tambahkan `--env-file /path/ke/.env` atau set `LITTLE_OFFICE_ENV_FILE`. Pada macOS, installer menyimpan path env ke LaunchAgent sehingga service memakai URL/token yang sama setelah login. Environment process `LITTLE_OFFICE_URL`, `LITTLE_OFFICE_API_TOKEN`, `LITTLE_OFFICE_CLIENT_ID`, `LITTLE_OFFICE_MACHINE_LABEL`, `LITTLE_OFFICE_MACHINE_LABEL_MODE`, `LITTLE_OFFICE_NAME_MODE`, dan opsional `LITTLE_OFFICE_NAME_SALT` mengoverride nilai file.
+
+`LITTLE_OFFICE_NAME_MODE` menerima `alias` (default dan rekomendasi untuk public), `project` (basename folder, hanya jaringan private), `random` (alias baru setiap session), atau `hidden` (nama generik tanpa field project). Alias dibuat lokal dengan salt permission `0600`; nama folder asli tidak pernah masuk payload. `LITTLE_OFFICE_MACHINE_LABEL_MODE=hidden` mencegah label mesin tampil di panel koneksi.
 
 Untuk home lain: tambahkan `--home /path/to/codex-home`. Default membaca `CODEX_HOME`, atau `~/.codex`. Autostart macOS saat ini memakai satu service per user; gunakan satu Codex home pada service tersebut. Instal ulang setelah memperbarui source client.
 
@@ -69,7 +73,7 @@ Untuk home lain: tambahkan `--home /path/to/codex-home`. Default membaca `CODEX_
 
 Polling lokal setiap satu detik. Snapshot dikirim segera saat berubah dan heartbeat setiap 10 detik; kegagalan memakai retry 1–30 detik. Server menahan metadata orang selesai selama 90 detik untuk animasi keluar, lalu menghapusnya. Completion lama tidak menutup turn baru. Thread selesai saat client mulai tidak menjalankan ulang pekerjaan lama.
 
-Client tidak mengirim isi chat, reasoning, command, argument tool, output, instruksi, full path, atau kredensial OpenAI. Payload hanya berisi ID hash session, nama folder, peran, status, label aktivitas umum, waktu aktivitas, dan penanda aktif. Token hanya berada dalam header autentikasi. Config dan status lokal permission 0600; tidak disimpan di Git.
+Client tidak mengirim isi chat, reasoning, command, argument tool, output, instruksi, full path, nama folder asli saat mode aman, atau kredensial OpenAI. Payload hanya berisi ID hash session, nama publik sesuai kebijakan, peran, status, label aktivitas umum, waktu aktivitas, dan penanda aktif. Token hanya berada dalam header autentikasi. Config, salt, dan status lokal permission 0600; tidak disimpan di Git.
 
 ## Batas pengamat lokal
 
@@ -99,7 +103,7 @@ File instalasi: `~/.codex/nekoffice/{client.py,observer.py,client.json,status.js
 
 ## Kontrak API
 
-`POST /api/codex/heartbeat` memakai JSON dan `Authorization: Bearer TOKEN_SERVER`. Versi v0.2 menambahkan `machineLabel`, `bridgeVersion`, `projectName`, `projectKey`, dan `activityCode`; server tetap menerima payload client lama.
+`POST /api/codex/heartbeat` memakai JSON dan `Authorization: Bearer TOKEN_SERVER`. Versi v0.2 menambahkan `machineLabel`, `machineLabelMode`, `bridgeVersion`, `projectName`, `projectKey`, dan `activityCode`; server tetap menerima payload client lama.
 
 ```json
 {

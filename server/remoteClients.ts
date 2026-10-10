@@ -21,7 +21,8 @@ export class RemoteClients {
  ingest(raw:unknown){
   if(!object(raw)||raw.version!==1||!Number.isSafeInteger(raw.sequence)||(raw.sequence as number)<1||!Array.isArray(raw.sessions)||raw.sessions.length>128)throw new EventError('Expected version 1, positive sequence and at most 128 sessions.');
   const clientId=identifier(raw.clientId,'clientId'),producerId=identifier(raw.producerId,'producerId'),key=clientId+':'+producerId,previous=this.producers.get(key),now=this.now();
-  const machineLabel=typeof raw.machineLabel==='string'&&raw.machineLabel.trim()?raw.machineLabel.trim().slice(0,48):`Mesin ${clientId.slice(0,6)}`;
+  const machineLabelMode=raw.machineLabelMode==='hidden'?'hidden':'show';
+  const machineLabel=machineLabelMode==='hidden'?'Mesin anonim':typeof raw.machineLabel==='string'&&raw.machineLabel.trim()?raw.machineLabel.trim().slice(0,48):`Mesin ${clientId.slice(0,6)}`;
   const bridgeVersion=typeof raw.bridgeVersion==='string'&&raw.bridgeVersion.trim()?raw.bridgeVersion.slice(0,32):`${this.kind}-bridge/1`;
   const sessions:Session[]=raw.sessions.map(row=>{
    if(!object(row)||typeof row.active!=='boolean'||typeof row.updatedAt!=='number'||!Number.isSafeInteger(row.updatedAt)||row.updatedAt<0)throw new EventError('Invalid session metadata.');

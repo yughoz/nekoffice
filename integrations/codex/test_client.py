@@ -41,7 +41,7 @@ class TransportTests(unittest.TestCase):
         self.thread.join()
 
     def transport(self, url=None):
-        return Transport({'serverUrl': url or self.url, 'apiToken': 'a' * 64, 'clientId': 'machine'})
+        return Transport({'serverUrl': url or self.url, 'apiToken': 'a' * 64, 'clientId': 'machine', 'machineLabel': 'Private Mac'})
 
     def test_authenticated_snapshot_has_stable_producer_and_increasing_sequence(self):
         transport = self.transport()
@@ -51,8 +51,17 @@ class TransportTests(unittest.TestCase):
         self.assertEqual(path, '/api/codex/heartbeat')
         self.assertEqual(auth, 'Bearer ' + 'a' * 64)
         self.assertEqual(first['version'], 1)
+        self.assertEqual(first['machineLabel'], '')
+        self.assertEqual(first['machineLabelMode'], 'hidden')
         self.assertEqual(first['producerId'], self.received[1][2]['producerId'])
         self.assertEqual(self.received[1][2]['sequence'], 2)
+
+    def test_machine_label_is_only_sent_when_explicitly_enabled(self):
+        transport = Transport({'serverUrl': self.url, 'apiToken': 'a' * 64, 'clientId': 'machine',
+                               'machineLabel': 'Private Mac', 'machineLabelMode': 'show'})
+        self.assertTrue(transport.send([]))
+        self.assertEqual(self.received[0][2]['machineLabel'], 'Private Mac')
+        self.assertEqual(self.received[0][2]['machineLabelMode'], 'show')
 
     def test_redirect_does_not_forward_api_token(self):
         self.assertFalse(self.transport(self.url + '/redirect').send([]))

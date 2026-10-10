@@ -16,7 +16,8 @@ class ObserverTests(unittest.TestCase):
         self.directory = self.home / 'sessions/2026/10/09'
         self.directory.mkdir(parents=True)
         self.now = int(time.time() * 1000)
-        self.observer = Observer(self.home, now=lambda: self.now)
+        self.observer = Observer(self.home, now=lambda: self.now,
+                                 settings={'LITTLE_OFFICE_NAME_MODE': 'project'})
 
     def tearDown(self):
         self.temp.cleanup()
@@ -142,6 +143,29 @@ class ObserverTests(unittest.TestCase):
         tail = self.observer.tails[path]
         self.assertLessEqual(len(tail.buffer), 4 * 1024 * 1024)
         self.assertEqual(tail.offset, path.stat().st_size)
+
+    def test_public_name_modes_never_send_raw_project_in_safe_modes(self):
+        path = self.session('safe')
+        self.event(path, 'task_started')
+        alias = Observer(self.home, now=lambda: self.now,
+                         settings={'LITTLE_OFFICE_NAME_MODE': 'alias', 'LITTLE_OFFICE_NAME_SALT': 'test-salt'})
+        row = alias.poll()[0]['agent']
+        self.assertNotEqual(row['name'], 'my-project')
+        self.assertEqual(row['projectName'], row['name'])
+        self.assertNotIn('my-project', json.dumps(row))
+
+        hidden = Observer(self.home, now=lambda: self.now,
+                          settings={'LITTLE_OFFICE_NAME_MODE': 'hidden', 'LITTLE_OFFICE_NAME_SALT': 'test-salt'})
+        hidden_row = hidden.poll()[0]['agent']
+        self.assertEqual(hidden_row['name'], 'Codex Agent')
+        self.assertNotIn('projectName', hidden_row)
+        self.assertNotIn('my-project', json.dumps(hidden_row))
+
+        random_names = Observer(self.home, now=lambda: self.now,
+                                settings={'LITTLE_OFFICE_NAME_MODE': 'random', 'LITTLE_OFFICE_NAME_SALT': 'test-salt'})
+        random_row = random_names.poll()[0]['agent']
+        self.assertRegex(random_row['name'], r'^Agent-[0-9A-F]{6}$')
+        self.assertNotIn('my-project', json.dumps(random_row))
 
 
 if __name__ == '__main__':

@@ -32,7 +32,7 @@ class TransportTests(unittest.TestCase):
         server=ThreadingHTTPServer(('127.0.0.1',0),Handler)
         thread=threading.Thread(target=server.serve_forever,daemon=True)
         thread.start()
-        client=transport.HttpTransport('http://127.0.0.1:'+str(server.server_port),'a'*64,'machine')
+        client=transport.HttpTransport('http://127.0.0.1:'+str(server.server_port),'a'*64,'machine', settings={'LITTLE_OFFICE_MACHINE_LABEL':'Private Mac'})
         try:
             record={'instance':'producer','sessions':[{'agent':{'name':'project'},'active':True}], 'pid':123}
             self.assertTrue(client.send(record))
@@ -40,11 +40,35 @@ class TransportTests(unittest.TestCase):
             self.assertEqual(received[0][0],'/api/hermes/heartbeat')
             self.assertEqual(received[0][1],'Bearer '+'a'*64)
             self.assertNotIn('apiToken',received[0][2])
+            self.assertEqual(received[0][2]['machineLabel'], '')
+            self.assertEqual(received[0][2]['machineLabelMode'], 'hidden')
             self.assertEqual(received[1][2]['sequence'],2)
         finally:
             server.shutdown()
             server.server_close()
         self.assertFalse(client.send(record))
+
+    def test_machine_label_is_only_sent_when_explicitly_enabled(self):
+        received=[]
+        class Handler(BaseHTTPRequestHandler):
+            def do_POST(self):
+                received.append(json.loads(self.rfile.read(int(self.headers['Content-Length']))))
+                self.send_response(200)
+                self.end_headers()
+                self.wfile.write(b'{"ok":true}')
+            def log_message(self,*args):
+                pass
+        server=ThreadingHTTPServer(('127.0.0.1',0),Handler)
+        thread=threading.Thread(target=server.serve_forever,daemon=True)
+        thread.start()
+        client=transport.HttpTransport('http://127.0.0.1:'+str(server.server_port),'a'*64,'machine', settings={'LITTLE_OFFICE_MACHINE_LABEL':'Private Mac','LITTLE_OFFICE_MACHINE_LABEL_MODE':'show'})
+        try:
+            self.assertTrue(client.send({'instance':'producer','sessions':[]}))
+            self.assertEqual(received[0]['machineLabel'],'Private Mac')
+            self.assertEqual(received[0]['machineLabelMode'],'show')
+        finally:
+            server.shutdown()
+            server.server_close()
 
     def test_identity_is_persistent_and_config_env_overrides(self):
         with tempfile.TemporaryDirectory() as directory:

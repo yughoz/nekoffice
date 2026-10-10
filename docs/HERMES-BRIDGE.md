@@ -2,7 +2,7 @@
 
 Untuk memakai satu server pusat dan banyak mesin Hermes, ikuti [panduan server/client HTTP](SERVER-CLIENT.md). Catatan di bawah menjelaskan mode lokal yang sudah dipasang pada mesin ini; versi client terbaru mendukung keduanya.
 
-Bridge ini menampilkan pekerjaan Hermes di kantor lokal: **satu session induk = satu orang**. Nama orang mengikuti nama folder kerja session, misalnya `/work/my-channel` menjadi `my-channel`. Dua session di folder yang sama tetap dua orang. Session yang dipakai lagi mempertahankan identitas orang yang sama.
+Bridge ini menampilkan pekerjaan Hermes di kantor lokal: **satu session induk = satu orang**. Kebijakan nama diatur melalui `LITTLE_OFFICE_NAME_MODE`; default `alias` menampilkan pseudonim stabil seperti `Moss-42`, sedangkan `project` memakai nama folder, `random` membuat alias baru tiap session, dan `hidden` memakai nama generik. Dua session di folder yang sama tetap dua orang. Session yang dipakai lagi mempertahankan identitas orang yang sama.
 
 ## Cara pakai di mesin ini
 
@@ -32,7 +32,7 @@ Tidak ada hitungan selesai buatan untuk session nyata. Selama runtime menyatakan
 
 [ACP Hermes](https://hermes-agent.nousresearch.com/docs/user-guide/features/acp) menyediakan koneksi untuk client ACP. Untuk memantau pemakaian terminal, Desktop, dan gateway Telegram, bridge ini memakai [lifecycle hook Hermes](https://hermes-agent.nousresearch.com/docs/user-guide/features/hooks) pada runtime yang sama. Plugin mengamati awal/akhir giliran, aktivitas tool, dan subagent. Plugin harus aktif pada **home/profile yang menjalankan session tersebut**; runtime lain, safe mode, atau versi Hermes tanpa hook tersebut tidak otomatis terbaca.
 
-Plugin tidak menjalankan agent, mengubah tool, atau mengirim pesan Telegram. Event hanya berisi ID session yang dihash, nama folder, jenis permukaan, status, nama tool, dan timestamp. Prompt, jawaban, command, argumen tool, hasil tool, serta kredensial tidak ditulis ke bridge.
+Plugin tidak menjalankan agent, mengubah tool, atau mengirim pesan Telegram. Event hanya berisi ID session yang dihash, nama publik sesuai kebijakan nama, jenis permukaan, status, nama tool, dan timestamp. Prompt, jawaban, command, argumen tool, full path, nama folder asli saat mode aman, serta kredensial tidak ditulis ke bridge.
 
 ## Pemasangan ulang / mesin lain
 
@@ -50,6 +50,15 @@ python3 integrations/hermes/install_bridge.py --home ~/.hermes/profiles/NAMA_PRO
 ```
 
 Installer menyalin dua file plugin milik project dan memanggil `hermes plugins enable little-office-bridge --no-allow-tool-override`. File plugin sebelumnya disimpan sebagai `.previous` bila berbeda. Installer tidak mengedit core Hermes. Perintah resmi Hermes mengatur daftar plugin aktif dan mencoba aktivasi pada backend/gateway berjalan. Ikuti hasil aktivasi yang dicetak; jangan restart gateway di tengah pekerjaan.
+
+Untuk server public, tambahkan ke `.env` client:
+
+```dotenv
+LITTLE_OFFICE_NAME_MODE=alias
+LITTLE_OFFICE_MACHINE_LABEL_MODE=hidden
+```
+
+`alias` adalah default dan memakai salt lokal permission `0600`; nama folder asli tidak dikirim. Gunakan `project` hanya pada server private, `random` bila alias perlu berubah tiap session, atau `hidden` bila project sama sekali tidak boleh tampil. `LITTLE_OFFICE_MACHINE_LABEL_MODE=show` hanya aman untuk jaringan private.
 
 Metadata ditulis atomik ke `~/.hermes/plugins/little-office-bridge/spool`, satu file per proses plugin. Semua profile memakai lokasi metadata yang sama. Viewer dev dan preview membaca lokasi ini, lalu menyiarkan snapshot melalui SSE yang sudah dipakai aplikasi. Setelah restart viewer, session masih aktif dipulihkan dari metadata; pekerjaan lama yang sudah selesai tidak dimainkan ulang. Manual API tetap tersedia dan berbagi batas kapasitas 64 orang.
 

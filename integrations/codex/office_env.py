@@ -28,7 +28,9 @@ def load_dotenv(path):
 
 def office_env(path):
     values = load_dotenv(path)
-    for key in ('LITTLE_OFFICE_URL', 'LITTLE_OFFICE_API_TOKEN', 'LITTLE_OFFICE_CLIENT_ID', 'LITTLE_OFFICE_MACHINE_LABEL'):
+    for key in ('LITTLE_OFFICE_URL', 'LITTLE_OFFICE_API_TOKEN', 'LITTLE_OFFICE_CLIENT_ID',
+                'LITTLE_OFFICE_MACHINE_LABEL', 'LITTLE_OFFICE_MACHINE_LABEL_MODE',
+                'LITTLE_OFFICE_NAME_MODE', 'LITTLE_OFFICE_NAME_SALT'):
         if key in os.environ:
             values[key] = os.environ[key]
     return values

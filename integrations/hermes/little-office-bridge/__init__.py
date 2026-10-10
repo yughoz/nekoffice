@@ -2,9 +2,11 @@
 from __future__ import annotations
 import atexit
 import hashlib
+import hmac
 import json
 import os
 import re
+import secrets
 import threading
 import time
 import uuid
@@ -17,6 +19,8 @@ HOOKS = (
 )
 SURFACES = {'cli': 'Terminal', 'terminal': 'Terminal', 'tui': 'Desktop/TUI',
             'desktop': 'Desktop', 'web': 'Desktop', 'telegram': 'Telegram', 'acp': 'ACP'}
+NAME_MODES = {'project', 'alias', 'random', 'hidden'}
+ALIAS_WORDS = ('Amber', 'Cedar', 'Clover', 'Moss', 'River', 'Sage', 'Willow', 'Pine', 'Meadow', 'Maple', 'Fern', 'Pebble')
 
 
 def project_name(cwd):
@@ -24,6 +28,67 @@ def project_name(cwd):
         return 'Hermes'
     path = PureWindowsPath(cwd) if '\\' in cwd else Path(cwd)
     return (path.name or 'Hermes')[:48]
+
+
+def normalize_name_mode(value):
+    value = str(value or '').strip().lower()
+    return value if value in NAME_MODES else 'alias'
+
+
+def _private_salt(path, supplied=''):
+    if supplied:
+        return str(supplied)
+    path = Path(path)
+    try:
+        path.parent.mkdir(parents=True, exist_ok=True, mode=0o700)
+        if path.exists():
+            value = path.read_text(encoding='utf-8').strip()
+            if value:
+                return value
+        value = secrets.token_hex(32)
+        descriptor = path.open('x')
+        try:
+            descriptor.write(value + '\n')
+        finally:
+            descriptor.close()
+        path.chmod(0o600)
+        return value
+    except (OSError, ValueError):
+        return 'local-hermes-name-salt'
+
+
+class NamePolicy:
+    def __init__(self, mode='alias', salt='', salt_path=None, provider='Hermes'):
+        self.mode = normalize_name_mode(mode)
+        self.salt = _private_salt(salt_path, salt) if salt_path else (str(salt) or 'local-hermes-name-salt')
+        self.provider = provider
+        self.random_names = {}
+
+    def _digest(self, value):
+        return hmac.new(self.salt.encode('utf-8'), str(value).encode('utf-8'), hashlib.sha256).hexdigest()
+
+    def public(self, raw, identity):
+        raw = str(raw or self.provider).strip()[:48] or self.provider
+        if self.mode == 'project':
+            return raw
+        if self.mode == 'hidden':
+            return self.provider + ' Agent'
+        if self.mode == 'random':
+            if identity not in self.random_names:
+                self.random_names[identity] = 'Agent-' + secrets.token_hex(3).upper()
+            return self.random_names[identity]
+        digest = self._digest(raw)
+        return f'{ALIAS_WORDS[int(digest[:2], 16) % len(ALIAS_WORDS)]}-{digest[2:6].upper()}'
+
+    def project_key(self, raw, identity):
+        if self.mode == 'hidden':
+            return None
+        value = str(raw or self.provider)
+        if self.mode == 'project':
+            return hashlib.sha256(value.encode('utf-8')).hexdigest()[:16]
+        if self.mode == 'random':
+            return hashlib.sha256((self.provider + '\0' + str(identity)).encode('utf-8')).hexdigest()[:16]
+        return self._digest(value)[:16]
 
 
 def runtime_cwd(payload):
@@ -56,9 +121,14 @@ def runtime_cwd(payload):
 
 
 class SessionObserver:
-    def __init__(self, profile, cwd_resolver=runtime_cwd):
+    def __init__(self, profile, cwd_resolver=runtime_cwd, settings=None):
         self.profile = str(profile)
         self.cwd_resolver = cwd_resolver
+        settings = settings or {}
+        name_mode = settings.get('LITTLE_OFFICE_NAME_MODE') or settings.get('nameMode') or 'alias'
+        name_salt = settings.get('LITTLE_OFFICE_NAME_SALT') or settings.get('nameSalt') or ''
+        self.names = NamePolicy(name_mode, name_salt,
+                                Path(self.profile) / 'plugins/little-office-bridge' / 'name-salt')
         self.sessions = {}
         self.parents = {}
         self.task_sessions = {}
@@ -141,18 +211,24 @@ class SessionObserver:
                 elif event in ('on_session_finalize', 'on_session_reset'):
                     task = 'Session tidak aktif'
             # A child keeps its own identity and is linked to the root for the viewer.
-            name = previous['agent']['name'] if previous else (parent_state['agent']['name'] if parent_state else 'Hermes')
+            raw_name = previous.get('projectRaw', 'Hermes') if previous else (parent_state.get('projectRaw', 'Hermes') if parent_state else 'Hermes')
             if cwd and not is_child and not event.startswith('subagent_'):
-                name = project_name(cwd)
+                raw_name = project_name(cwd)
             if is_child and cwd and not previous:
-                child_name = project_name(cwd)
-                name = child_name if child_name != (parent_state or {}).get('agent', {}).get('name') else child_name+' · subagent'
-            if is_child and len(name) < 48 and name == (parent_state or {}).get('agent', {}).get('name'):
+                raw_name = project_name(cwd)
+            name = self.names.public(raw_name, raw)
+            parent_name = self.names.public((parent_state or {}).get('projectRaw', 'Hermes'), root)
+            if is_child and name == parent_name:
                 name += ' · subagent'
             agent = {'id': self._id(raw), 'name': name,
                      'role': 'Hermes · Subagent' if is_child else 'Hermes · '+surface, 'team': 'research',
                      'status': status, 'task': task, 'parentId': self._id(root) if is_child else None, 'progress': None}
-            self.sessions[raw] = {'agent': agent, 'surface': platform,
+            project_key = self.names.project_key(raw_name, raw)
+            if self.names.mode != 'hidden':
+                agent['projectName'] = name
+                if project_key:
+                    agent['projectKey'] = project_key
+            self.sessions[raw] = {'agent': agent, 'projectRaw': raw_name, 'surface': platform,
                                    'active': not terminal, 'updatedAt': now}
             # Bound telemetry memory; prefer recent sessions.
             if len(self.sessions)>128:
@@ -262,11 +338,12 @@ def register(ctx):
         profile = get_hermes_home()
     except ImportError:
         profile = os.getenv('HERMES_HOME', str(Path.home()/'.hermes'))
-    observer = SessionObserver(profile)
+    from .transport import load_settings, load_transport
+    _, settings = load_settings()
+    observer = SessionObserver(profile, settings=settings)
     # All profiles write sanitized telemetry to one local directory.
     directory = Path(os.getenv('LITTLE_OFFICE_HERMES_SPOOL',
                               str(Path.home()/'.hermes/plugins/little-office-bridge/spool')))
-    from .transport import load_transport
     writer = MetadataWriter(observer, directory, transport=load_transport())
     for event in HOOKS:
         def callback(_event=event, **payload):
