@@ -19,14 +19,14 @@ export default function App(){
  const clearFilters=()=>setFilters({project:'',machine:'',provider:''});
  const filtersActive=Object.values(filters).some(Boolean);
  return <main className="office-app">
-  <header className="office-header"><div className="office-brand"><span><Leaf size={22}/></span><div><strong>little office</strong><small>{snapshot.title}</small></div></div>
+  <header className="office-header"><div className="office-brand"><span><Leaf size={22}/></span><div><strong>NekOffice</strong></div></div>
    <div className="office-header-actions"><div className="mode-switch" aria-label="Sumber tampilan"><button className={mode==='demo'?'selected':''} onClick={()=>{changeMode('demo');setSelected(null)}}>Demo</button><button className={mode==='api'?'selected':''} onClick={()=>{changeMode('api');setSelected(null)}}>Live API</button></div>
     <span className={`connection ${mode==='api'&&!connected?'offline':''}`}><i/>{mode==='demo'?'Simulasi':connected?'Server terhubung':'Menghubungkan…'}</span>
     <button className={`header-tool ${panel==='connections'?'active':''}`} onClick={()=>togglePanel('connections')} aria-label="Koneksi client"><Wifi size={16}/><span>{mode==='demo'?'Koneksi':`${clients.filter(c=>c.connected).length} mesin`}</span></button>
     <button className={`header-tool ${panel==='people'?'active':''}`} onClick={()=>togglePanel('people')} aria-label="Daftar agent"><Users size={16}/><span>{snapshot.agents.length} agent</span></button>
    </div></header>
   <section className="office-window"><Office view={{snapshot,paused,selected,reducedMotion}} onSelect={setSelected}/>
-   <div className="office-caption"><span><i/>{working} agent bekerja</span><span className="caption-separator">·</span><span>{filtersActive?`${snapshot.agents.length} ditampilkan · filter aktif`:mode==='demo'?'Animasi contoh':'Status dari script lu'}</span></div>
+   <div className="office-caption"><span><i/>{working} agent bekerja</span>{(filtersActive||mode==='demo')&&<><span className="caption-separator">·</span><span>{filtersActive?`${snapshot.agents.length} ditampilkan · filter aktif`:'Animasi contoh'}</span></>}</div>
    {mode==='api'&&!snapshot.agents.length&&<div className="waiting-card"><Leaf size={26}/><h2>{filtersActive?'Tidak ada yang cocok.':'Kantor siap.'}</h2><p>{filtersActive?'Hapus filter untuk melihat agent lain.':clients.some(c=>c.connected)?'Semua sedang istirahat. Client tetap terhubung.':'Menunggu agent terhubung.'}</p>{filtersActive&&<button onClick={clearFilters}>Hapus filter</button>}</div>}
    {agent&&detailAgent&&<div className="agent-card" aria-label={'Detail '+detailAgent.name}>
     <button className="card-close" aria-label="Tutup detail" onClick={()=>setSelected(null)}><X size={15}/></button>

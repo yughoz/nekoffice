@@ -21,5 +21,5 @@ export function demoSnapshot(tick:number,runSeed=0):OfficeSnapshot {
   const i=demoPeople.findIndex(person=>person[0]===id),teamRoom=team as Room;
   agents.push({id,name,team:teamRoom,room:teamRoom,role,status:phase<workTicks?'working':'done',task:phase<workTicks?demoTasks[teamRoom][(cycle+i)%demoTasks[teamRoom].length]:'Pekerjaan selesai',parentId:i===0?undefined:i%3===1?'mika':demoPeople[i-(i-1)%3][0],revision:tick});
  }
- return {epoch:`demo/${runSeed}`,revision:tick,title:'Kantor kreator',agents};
+ return {epoch:`demo/${runSeed}`,revision:tick,title:'NekOffice',agents};
 }

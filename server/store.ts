@@ -35,7 +35,7 @@ export function parseEvent(raw:unknown):OfficeEvent {
 }
 export class OfficeStore {
  private snapshot:OfficeSnapshot;private seen=new Set<string>();
- constructor(epoch='local'){this.snapshot={epoch,revision:0,title:'Kantor kreator',agents:[]};}
+ constructor(epoch='local'){this.snapshot={epoch,revision:0,title:'NekOffice',agents:[]};}
  get():OfficeSnapshot {return structuredClone(this.snapshot);}
  apply(raw:unknown):{duplicate:boolean;revision:number}{const e=parseEvent(raw);if(e.eventId&&this.seen.has(e.eventId))return {duplicate:true,revision:this.snapshot.revision};const revision=this.snapshot.revision+1;
   if(e.type==='agent.upsert'){const index=this.snapshot.agents.findIndex(a=>a.id===e.agent.id),previous=this.snapshot.agents[index];if(index<0&&this.snapshot.agents.length>=64)throw new EventError('Office capacity is 64 agents.',409);

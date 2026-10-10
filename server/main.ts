@@ -23,6 +23,6 @@ const dataDir=process.env.OFFICE_DATA_DIR;
 const api=createOfficeApi({token,historyPath:dataDir?join(dataDir,'history.json'):undefined,deviceTokensPath:dataDir?join(dataDir,'device-tokens.json'):undefined});
 const server=createServer((req,res)=>{void api.middleware(req,res,()=>{void staticFile(req,res);});});
 server.requestTimeout=15000;server.headersTimeout=10000;
-api.start();server.listen(port,host,()=>console.log(`Little Office server: http://${host}:${port}`));
+api.start();server.listen(port,host,()=>console.log(`NekOffice server: http://${host}:${port}`));
 function shutdown(){api.close();server.close(()=>process.exit(0));setTimeout(()=>process.exit(0),3000).unref();}
 process.once('SIGTERM',shutdown);process.once('SIGINT',shutdown);

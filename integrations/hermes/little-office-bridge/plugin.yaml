@@ -1,8 +1,8 @@
 name: little-office-bridge
-label: Little Office
+label: NekOffice
 version: 1.1.0
 kind: tool
-description: Metadata-only session observer for the local Little Office animated viewer.
+description: Metadata-only session observer for the local NekOffice animated viewer.
 author: Local workspace
 provides_tools: []
 provides_hooks:

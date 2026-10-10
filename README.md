@@ -1,4 +1,4 @@
-# Little Office — tampilan untuk agent lu
+# NekOffice — tampilan untuk agent lu
 
 Live di **[office.nekoding.xyz](https://office.nekoding.xyz/)**. Lihat [catatan deployment dan operasi VPS](docs/DEPLOYMENT.md).
 
