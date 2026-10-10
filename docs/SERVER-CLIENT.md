@@ -6,7 +6,7 @@ Mesin B: Hermes + plugin client ── HTTPS + token ──┼── Server Litt
 Mesin C: Hermes + plugin client ── HTTPS + token ──┘   API + kantor di browser
 ```
 
-**Benar: tiap mesin Hermes cukup menjalankan plugin client.** Node, React, dan tampilan kantor hanya perlu dibuild/jalankan di server pusat. Browser lu membuka URL server untuk melihat office yang diizinkan. Client hanya membuat koneksi keluar, sehingga tidak perlu membuka port pada mesin Hermes.
+**Benar: tiap mesin Hermes cukup menjalankan plugin client.** Node, React, dan tampilan kantor hanya perlu dibuild/jalankan di server pusat. Browser lu membuka URL server untuk melihat semua orang. Client hanya membuat koneksi keluar, sehingga tidak perlu membuka port pada mesin Hermes.
 
 Satu session induk = satu orang, nama dari folder kerja session. Subagent digabung ke session induk. ID client stabil membedakan mesin; dua mesin dengan session ID/folder yang sama tetap dua orang.
 
@@ -33,7 +33,7 @@ PY
 npm start
 ```
 
-Buka `http://ALAMAT_SERVER:3000/`. Untuk domain internet, arahkan domain lewat reverse proxy HTTPS ke port 3000. UI, API, dan SSE berada pada origin yang sama. Pada proxy SSE, matikan buffering dan izinkan koneksi panjang; heartbeat SSE dikirim setiap 15 detik. Viewer publik tidak perlu login. Owner registrasi atau masuk melalui tombol **Masuk owner** dengan akun lokal untuk melihat office private, mengubah pengaturan, dan membuat device token.
+Buka `http://ALAMAT_SERVER:3000/`. Untuk domain internet, arahkan domain lewat reverse proxy HTTPS ke port 3000. UI, API, dan SSE berada pada origin yang sama. Pada proxy SSE, matikan buffering dan izinkan koneksi panjang; heartbeat SSE dikirim setiap 15 detik. Browser tidak perlu menyimpan token write.
 
 Alternatif Docker, setelah `.env` dibuat:
 
@@ -100,9 +100,6 @@ Server menyimpan status saat ini di memori. Setelah restart server, client yang 
 | --- | --- |
 | `GET /` | Tampilan kantor |
 | `GET /api/health` | Server hidup |
-| `GET /api/public/offices` | Daftar office yang memilih tampil publik |
-| `GET /api/public/offices/:slug` dan `/stream` | Snapshot/SSE read-only office publik |
-| `GET /api/auth/me` | Status login owner |
 | `GET /api/state` | Snapshot semua orang |
 | `GET /api/stream` | SSE untuk browser |
 | `GET /api/integrations/hermes` | Jumlah client, producer, dan session aktif |

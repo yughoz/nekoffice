@@ -1,6 +1,6 @@
 {
   "extends": "./tsconfig.json",
   "compilerOptions": {"noEmit":false,"outDir":"dist-server","rootDir":".","types":["node"]},
-  "include": ["server/main.ts","server/api.ts","server/auth.ts","server/offices.ts","server/remoteClients.ts","server/store.ts","server/history.ts","server/deviceTokens.ts"],
+  "include": ["server/main.ts","server/api.ts","server/remoteClients.ts","server/store.ts","server/history.ts"],
   "exclude": ["**/*.test.ts"]
 }
