@@ -78,6 +78,14 @@ Untuk mematikan bridge pada home/profile yang digunakan:
 hermes plugins disable little-office-bridge
 ```
 
+Untuk mencopot bridge beserta config, token, spool, dan file plugin lokal:
+
+```sh
+python3 integrations/hermes/install_bridge.py --uninstall
+```
+
+Perintah ini tidak menghapus `.env`, project kerja, atau instalasi Hermes. Jika Hermes sedang membuka session, mulai ulang runtime setelah uninstall agar hook lama benar-benar dilepas.
+
 ## Verifikasi
 
 ```sh

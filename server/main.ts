@@ -3,6 +3,7 @@ import {readFile,stat} from 'node:fs/promises';
 import {resolve,extname,sep,join} from 'node:path';
 import {fileURLToPath} from 'node:url';
 import {createOfficeApi} from './api.js';
+import {ApiMirror} from './mirror.js';
 
 const token=process.env.OFFICE_API_TOKEN;
 if(!token||token.length<32||token.startsWith('replace-with-'))throw new Error('Set OFFICE_API_TOKEN to a random secret of at least 32 characters.');
@@ -20,7 +21,11 @@ async function staticFile(req:IncomingMessage,res:ServerResponse){
  catch{res.writeHead(404);res.end('Not found');}
 }
 const dataDir=process.env.OFFICE_DATA_DIR;
-const api=createOfficeApi({token,historyPath:dataDir?join(dataDir,'history.json'):undefined,deviceTokensPath:dataDir?join(dataDir,'device-tokens.json'):undefined});
+const mirrorUrl=process.env.OFFICE_MIRROR_URL?.trim();
+const mirrorToken=process.env.OFFICE_MIRROR_TOKEN?.trim();
+if(mirrorUrl&&!mirrorToken)throw new Error('Set OFFICE_MIRROR_TOKEN when OFFICE_MIRROR_URL is configured.');
+const mirror=mirrorUrl?new ApiMirror({url:mirrorUrl,token:mirrorToken!}):undefined;
+const api=createOfficeApi({token,historyPath:dataDir?join(dataDir,'history.json'):undefined,deviceTokensPath:dataDir?join(dataDir,'device-tokens.json'):undefined,mirror});
 const server=createServer((req,res)=>{void api.middleware(req,res,()=>{void staticFile(req,res);});});
 server.requestTimeout=15000;server.headersTimeout=10000;
 api.start();server.listen(port,host,()=>console.log(`NekOffice server: http://${host}:${port}`));

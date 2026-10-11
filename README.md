@@ -24,6 +24,10 @@ npm ci
 npm run dev
 ```
 
+### Soundtrack lokal
+
+Pemutar musik kantor membaca semua file `.mp3` yang ada di `public/assets/audio/lofi/`. Tombolnya tersedia di footer untuk putar/jeda, mute, dan lagu berikutnya. Folder audio sengaja di-ignore dari Git, jadi salin koleksi musik ke folder itu secara lokal pada setiap mesin atau deployment yang ingin memutar soundtrack. Jika file tidak tersedia, tampilan tetap berjalan dan player menampilkan status musik tidak tersedia.
+
 Buka URL yang dicetak Vite. Pilih **Demo** untuk melihat agent datang bergantian lewat pintu, berjalan ke komputer, mengetik, lalu keluar setelah selesai. Waktu kedatangan, durasi kerja, jeda, dan kecepatan jalan bervariasi antar agent; jadwal demo diacak saat halaman dibuka; demo terus mengulang. Pilih **Live API** untuk melihat agent lu; update pertama dari script otomatis mengaktifkan Live API. Klik avatar untuk melihat status dan aktivitas singkat. Tombol Daftar agent menyediakan pilihan lewat keyboard. Kamera mendukung pan, zoom, fit dan follow. Pause hanya tersedia untuk animasi demo.
 
 ## Hubungkan script

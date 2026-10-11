@@ -6,5 +6,7 @@ services:
       - "${PORT:-3000}:3000"
     environment:
       OFFICE_API_TOKEN: ${OFFICE_API_TOKEN:?Set OFFICE_API_TOKEN in .env}
+      OFFICE_MIRROR_URL: ${OFFICE_MIRROR_URL:-}
+      OFFICE_MIRROR_TOKEN: ${OFFICE_MIRROR_TOKEN:-}
       HOST: 0.0.0.0
       PORT: 3000

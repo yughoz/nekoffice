@@ -16,15 +16,44 @@ from office_env import office_env
 LABEL = 'xyz.nekoding.office.codex'
 
 
+def uninstall(home):
+    home = home.expanduser().resolve()
+    directory = home / 'nekoffice'
+    service = Path.home() / 'Library/LaunchAgents' / (LABEL + '.plist')
+    service_matches_home = False
+    if service.exists():
+        try:
+            with service.open('rb') as source:
+                plist = plistlib.load(source)
+            arguments = [str(value) for value in plist.get('ProgramArguments', [])]
+            service_matches_home = str(home) in arguments
+        except (OSError, TypeError, ValueError, plistlib.InvalidFileException):
+            service_matches_home = False
+    if service_matches_home and sys.platform == 'darwin':
+        subprocess.run(['launchctl', 'bootout', 'gui/' + str(os.getuid()) + '/' + LABEL], capture_output=True)
+    if service_matches_home:
+        service.unlink()
+    if directory.exists():
+        if directory.parent != home or directory.name != 'nekoffice':
+            raise SystemExit('Refusing to remove an unexpected Codex client path: ' + str(directory))
+        shutil.rmtree(directory)
+    print(json.dumps({'uninstalled': str(directory), 'launchAgent': str(service) if service_matches_home else None,
+                      'envFilePreserved': True}))
+
+
 def main():
     parser = argparse.ArgumentParser(description='Install the local Codex client for Nekoffice.')
     parser.add_argument('--home', type=Path, default=default_home())
+    parser.add_argument('--uninstall', action='store_true', help='Stop and remove the local Nekoffice Codex client.')
     parser.add_argument('--server')
     parser.add_argument('--env-file', type=Path, help='Optional dotenv file with LITTLE_OFFICE_URL and LITTLE_OFFICE_API_TOKEN.')
     parser.add_argument('--from-hermes-config', action='store_true', help='Reuse the local Hermes office URL and API token.')
     parser.add_argument('--autostart', action='store_true', help='Start now and at login on macOS using launchd.')
     parser.add_argument('--stale-seconds', type=int, default=600)
     args = parser.parse_args()
+    if args.uninstall:
+        uninstall(args.home)
+        return
     if args.autostart and sys.platform != 'darwin':
         parser.error('--autostart currently supports macOS. Run client.py manually on Linux.')
     if args.stale_seconds < 35:

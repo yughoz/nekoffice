@@ -12,7 +12,7 @@ Source aplikasi yang dideploy berasal dari commit `3da6755c0546cff81db6a53896be9
 | --- | --- |
 | `/opt/nekoffice/releases/<commit>/` | Source build per release |
 | `/opt/nekoffice/current` | Symlink release aktif |
-| `/opt/nekoffice/.env` | Token API, port bind, dan tag release; permission 0600 |
+| `/opt/nekoffice/.env` | Token API, mirror opsional, port bind, dan tag release; permission 0600 |
 | `/opt/nekoffice/data/` | Riwayat v0.2; volume host persisten, tidak masuk image |
 | `/etc/caddy/conf.d/office.nekoding.xyz.caddy` | Proxy khusus domain kantor |
 

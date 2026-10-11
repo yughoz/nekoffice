@@ -60,6 +60,17 @@ python3 integrations/hermes/install_bridge.py --env-file .env
 
 `LITTLE_OFFICE_URL` dan `LITTLE_OFFICE_API_TOKEN` di `.env` menentukan server dan token client. Alternatifnya, URL dapat diberikan langsung dengan `--server`; token tetap diminta secara tersembunyi. File `.env` hanya berada di mesin client dan jangan dimasukkan ke Git.
 
+### Mirror ke office kedua
+
+Jika satu office menjadi pintu masuk untuk dua tampilan, server pertama dapat meneruskan setiap write yang berhasil ke server NekOffice kedua. Atur ini hanya di environment server pertama:
+
+```sh
+OFFICE_MIRROR_URL=https://holding.neko.my.id
+OFFICE_MIRROR_TOKEN=token-server-holding
+```
+
+`OFFICE_MIRROR_TOKEN` adalah `OFFICE_API_TOKEN` milik server tujuan dan tidak pernah dikirim ke browser atau client agent. Gateway meneruskan heartbeat Hermes/Codex, event, dan update agent secara berurutan. Endpoint `GET /api/integrations/mirror` menampilkan status forward terakhir tanpa membuka token. Jangan mengaktifkan mirror balik dari Holding ke NekOffice karena akan membuat loop; header internal mirror sudah memblokir re-forward jika salah konfigurasi, tetapi satu arah tetap menjadi konfigurasi yang dianjurkan.
+
 ### Privasi nama project pada server public
 
 Client menyamarkan nama folder sebelum mengirim heartbeat. Pilih kebijakan di `.env`:
@@ -119,6 +130,7 @@ Server menyimpan status saat ini di memori. Setelah restart server, client yang 
 | `GET /api/state` | Snapshot semua orang |
 | `GET /api/stream` | SSE untuk browser |
 | `GET /api/integrations/hermes` | Jumlah client, producer, dan session aktif |
+| `GET /api/integrations/mirror` | Status forward ke office kedua, tanpa token |
 | `POST /api/hermes/heartbeat` | Snapshot autentikasi dari plugin client |
 | `POST /api/agents` dan `/api/events` | Script lain; gunakan token yang sama |
 

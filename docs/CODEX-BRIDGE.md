@@ -97,7 +97,12 @@ launchctl kickstart -k gui/$(id -u)/xyz.nekoding.office.codex
 # Hentikan dan nonaktifkan autostart
 launchctl bootout gui/$(id -u)/xyz.nekoding.office.codex
 rm ~/Library/LaunchAgents/xyz.nekoding.office.codex.plist
+
+# Hapus client, token, log, dan status lokal
+python3 integrations/codex/install.py --uninstall
 ```
+
+Perintah uninstall hanya menghapus client Nekoffice di `~/.codex/nekoffice` dan LaunchAgent. File `.env`, folder project, serta data Codex lain tidak disentuh.
 
 File instalasi: `~/.codex/nekoffice/{client.py,observer.py,client.json,status.json}`. Log service tidak berisi transcript. Menghentikan client tidak membatalkan session Codex.
 

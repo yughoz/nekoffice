@@ -4,8 +4,9 @@ import {OfficeStore,EventError} from './store.js';
 import {RemoteClients} from './remoteClients.js';
 import {OfficeHistory} from './history.js';
 import {DeviceTokenStore,type DeviceProvider} from './deviceTokens.js';
+import type {ApiMirror} from './mirror.js';
 
-type Options={token?:string;localHealth?:()=>unknown;historyPath?:string;deviceTokensPath?:string};
+type Options={token?:string;localHealth?:()=>unknown;historyPath?:string;deviceTokensPath?:string;mirror?:ApiMirror};
 export function createOfficeApi(options:Options={}){
  const store=new OfficeStore(randomUUID()),clients=new Set<ServerResponse>();
  const history=new OfficeHistory(options.historyPath);
@@ -24,6 +25,7 @@ export function createOfficeApi(options:Options={}){
   if(req.method==='GET'&&path==='/api/integrations/hermes'){json(res,200,{...remote.getHealth(),clientsList:remote.getRegistry(),...(options.localHealth?{local:options.localHealth()}:{})});return;}
   if(req.method==='GET'&&path==='/api/integrations/codex'){json(res,200,{...codex.getHealth(),clientsList:codex.getRegistry()});return;}
   if(req.method==='GET'&&path==='/api/integrations'){json(res,200,{serverNow:Date.now(),clients:[...remote.getRegistry(),...codex.getRegistry()]});return;}
+  if(req.method==='GET'&&path==='/api/integrations/mirror'){json(res,200,options.mirror?.getStatus()??{enabled:false,target:null,forwarded:0,failed:0,lastSuccessAt:null,lastFailureAt:null,lastStatus:null,lastError:null});return;}
   if(req.method==='GET'&&path==='/api/history'){const url=new URL(req.url||'/api/history','http://office.local');json(res,200,history.list(Number(url.searchParams.get('limit')||50),Number(url.searchParams.get('cursor')||0)));return;}
   if(path==='/api/device-tokens'){
    if(req.method==='GET'){if(authorized(req)!=='master'){json(res,401,{ok:false,error:'Admin token required.'});return;}json(res,200,{items:deviceTokens.list()});return;}
@@ -46,11 +48,12 @@ export function createOfficeApi(options:Options={}){
   if(!options.token&&path.endsWith('/heartbeat')){json(res,503,{ok:false,error:'Configure OFFICE_API_TOKEN to receive remote clients.'});return;}
   if(options.token&&!authorized(req)){json(res,401,{ok:false,error:'Invalid API token.'});return;}
   if(!req.headers['content-type']?.startsWith('application/json')){json(res,415,{ok:false,error:'Use Content-Type: application/json.'});return;}
+  const mirrored=req.headers['x-nekoffice-mirror']==='1';
   try{
    const body=await readJson(req);
-   if(path.endsWith('/heartbeat')){const result=(path==='/api/codex/heartbeat'?codex:remote).ingest(body);const source=path==='/api/codex/heartbeat'?'codex':'hermes';for(const agent of store.get().agents.filter(item=>item.provider===source))history.update(agent,agent.status!=='done',agent.status==='done'?(agent.task.includes('terputus')?'disconnected':'completed'):'observed');json(res,200,{ok:true,...result,revision:store.get().revision});return;}
-   const result=store.apply(path==='/api/agents'?{type:'agent.upsert',agent:body}:body);if(!result.duplicate){const snap=store.get();const changed=snap.agents.find(a=>a.id===((body as any)?.agent?.id||(body as any)?.id));if(changed)history.update(changed,changed.status!=='done',changed.status==='done'?'completed':'observed');publish();}json(res,200,{ok:true,...result});
+   if(path.endsWith('/heartbeat')){const result=(path==='/api/codex/heartbeat'?codex:remote).ingest(body);const source=path==='/api/codex/heartbeat'?'codex':'hermes';for(const agent of store.get().agents.filter(item=>item.provider===source))history.update(agent,agent.status!=='done',agent.status==='done'?(agent.task.includes('terputus')?'disconnected':'completed'):'observed');if(!mirrored)void options.mirror?.forward(path,body);json(res,200,{ok:true,...result,revision:store.get().revision});return;}
+   const result=store.apply(path==='/api/agents'?{type:'agent.upsert',agent:body}:body);if(!result.duplicate){const snap=store.get();const changed=snap.agents.find(a=>a.id===((body as any)?.agent?.id||(body as any)?.id));if(changed)history.update(changed,changed.status!=='done',changed.status==='done'?'completed':'observed');publish();if(!mirrored)void options.mirror?.forward(path,body);}json(res,200,{ok:true,...result});
   }catch(error){json(res,error instanceof EventError?error.status:500,{ok:false,error:error instanceof EventError?error.message:'Server could not process this event.'});}
  }
- return {store,remote,codex,history,deviceTokens,publish,middleware,start:()=>{remote.start();codex.start();},close:()=>{remote.stop();codex.stop();for(const client of clients)client.end();clients.clear();}};
+ return {store,remote,codex,history,deviceTokens,publish,middleware,start:()=>{remote.start();codex.start();},close:()=>{remote.stop();codex.stop();options.mirror?.close();for(const client of clients)client.end();clients.clear();}};
 }

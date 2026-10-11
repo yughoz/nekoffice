@@ -13,6 +13,7 @@ parser.add_argument('--home', type=Path, default=Path(os.getenv('HERMES_HOME', s
 parser.add_argument('--server', help='Central server base URL; omit to retain existing configuration')
 parser.add_argument('--env-file', type=Path, help='Optional dotenv file with LITTLE_OFFICE_URL and LITTLE_OFFICE_API_TOKEN.')
 parser.add_argument('--local-only', action='store_true', help='Clear shared HTTP config and use the local spool')
+parser.add_argument('--uninstall', action='store_true', help='Disable and remove the local Nekoffice Hermes bridge.')
 args = parser.parse_args()
 source = Path(__file__).parent/'little-office-bridge'
 if args.server and args.local_only:
@@ -21,6 +22,24 @@ spec = importlib.util.spec_from_file_location('office_transport', source/'transp
 transport = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(transport)
 config_path = transport.config_path()
+target = args.home.expanduser().resolve()/'plugins/little-office-bridge'
+if args.uninstall:
+    environment = dict(os.environ, HERMES_HOME=str(args.home.expanduser().resolve()))
+    try:
+        disabled = subprocess.run(['hermes','plugins','disable','little-office-bridge'], env=environment, capture_output=True, text=True)
+        disable_exit_code = disabled.returncode
+    except FileNotFoundError:
+        disable_exit_code = None
+    config_is_owned = bool(os.getenv('LITTLE_OFFICE_CLIENT_CONFIG')) or config_path.parent == target
+    if config_is_owned and config_path.exists() and config_path.is_file():
+        config_path.unlink()
+    if target.exists():
+        if target.parent != args.home.expanduser().resolve()/'plugins' or target.name != 'little-office-bridge':
+            raise SystemExit('Refusing to remove an unexpected Hermes bridge path: ' + str(target))
+        shutil.rmtree(target)
+    print(json.dumps({'uninstalled': str(target), 'configRemoved': str(config_path) if config_is_owned else None,
+                      'disableExitCode': disable_exit_code, 'envFilePreserved': True}))
+    raise SystemExit(0)
 env_path = (args.env_file or Path(os.getenv('LITTLE_OFFICE_ENV_FILE', str(Path.cwd()/'.env')))).expanduser().resolve()
 values = transport.office_env(env_path)
 existing = {}
@@ -43,7 +62,6 @@ elif server:
     with os.fdopen(fd, 'w') as output:
         json.dump({'serverUrl':server.rstrip('/'), 'apiToken':token, 'clientId':client_id, 'envFile':str(env_path)}, output)
     os.replace(temporary, config_path)
-target = args.home.expanduser().resolve()/'plugins/little-office-bridge'
 target.mkdir(parents=True, exist_ok=True, mode=0o700)
 manifest = target/'plugin.yaml'
 if manifest.exists() and 'name: little-office-bridge' not in manifest.read_text():
