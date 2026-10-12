@@ -7,6 +7,7 @@ Rilis ini menyempurnakan viewer realtime v0.5 dengan collision meja, catatan sin
 ## Perilaku
 
 - W/A/S/D dan tombol panah memakai collision geometry yang sama dengan path agent. Viewer akan berhenti di sisi meja dan dapat meluncur pada sumbu yang masih terbuka.
+- Tombol `Space` dan kontrol pause membekukan animasi di browser. Pada Live API, bridge dan data server tetap berjalan.
 - Server memeriksa ulang setiap posisi agar client tidak dapat menembus meja dengan request manual.
 - Input `Nama karakter` dan `Catatan singkat` di layar viewer dikirim lewat heartbeat viewer dan tersinkron ke karakter lain. Catatan dibatasi 50 karakter dan tidak menyimpan isi chat di history.
 - Batas viewer aktif default adalah 3. Set `OFFICE_MAX_VIEWERS` pada `.env` atau compose untuk mengubahnya. Session keempat menerima HTTP 429 ketika kapasitas penuh.

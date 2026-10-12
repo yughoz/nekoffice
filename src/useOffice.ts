@@ -23,5 +23,5 @@ export function useOffice(){
  const filtered=useMemo(()=>raw.agents.filter((agent:OfficeAgent)=>{const project=agent.projectName||agent.name,machine=agent.machineLabel||'Mesin lokal';return (!filters.project||project===filters.project)&&(!filters.machine||machine===filters.machine)&&(!filters.provider||agent.provider===filters.provider)}),[raw,filters]);
  const viewers=mode==='api'&&localViewer?[...raw.viewers.filter(item=>item.id!==localViewer.id),localViewer]:raw.viewers;
  const snapshot={...raw,agents:filtered,viewers};
- return {snapshot,allAgents:raw.agents,mode,changeMode,connected,paused:mode==='demo'&&paused,setPaused,clients,history,filters,setFilters,projects,machines,localViewer,setViewerName:viewerController.setName,setViewerNote:viewerController.setNote};
+ return {snapshot,allAgents:raw.agents,mode,changeMode,connected,paused,setPaused,clients,history,filters,setFilters,projects,machines,localViewer,setViewerName:viewerController.setName,setViewerNote:viewerController.setNote};
 }
