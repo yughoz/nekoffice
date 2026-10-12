@@ -5,9 +5,9 @@ import {roomHeight} from './officeLayout';
 
 type SavedSession={token:string;viewer:OfficeViewer};
 const SESSION_KEY='nekoffice-viewer-session';
-const SPEED=5.5,MAX_NOTE_LENGTH=50,MAX_NAME_LENGTH=32;
+const SPEED=5.5,MAX_NOTE_LENGTH=50,MAX_NAME_LENGTH=5;
 
-function randomName(){return `Penonton-${Math.floor(100+Math.random()*900)}`;}
+function randomName(){return `P${Math.floor(1000+Math.random()*9000)}`.slice(0,5);}
 
 export function useViewer(enabled=true,officeCount=15){
  const [viewer,setViewerState]=useState<OfficeViewer|null>(null);
@@ -21,7 +21,7 @@ export function useViewer(enabled=true,officeCount=15){
   let disposed=false;
   const save=(session:SavedSession)=>{try{sessionStorage.setItem(SESSION_KEY,JSON.stringify(session));}catch{/* private browsing */}};
   type MoveResult='ok'|'invalid'|'rejected';
-  const move=async(session:SavedSession,next:OfficeViewer):Promise<MoveResult>=>{try{const response=await fetch('/api/viewers/move',{method:'POST',headers:{'Content-Type':'application/json',Authorization:`Bearer ${session.token}`},body:JSON.stringify({position:next.position,direction:next.direction,moving:next.moving,name:next.name,note:next.note??''})});if(!response.ok)return response.status===401?'invalid':'rejected';const payload=await response.json() as {viewer?:OfficeViewer};if(payload.viewer){save({token:session.token,viewer:payload.viewer});if(!disposed){setViewer(payload.viewer);lastSentRef.current=Date.now();}}return 'ok';}catch{return 'rejected';}};
+  const move=async(session:SavedSession,next:OfficeViewer):Promise<MoveResult>=>{try{const response=await fetch('/api/viewers/move',{method:'POST',headers:{'Content-Type':'application/json',Authorization:`Bearer ${session.token}`},body:JSON.stringify({position:next.position,direction:next.direction,moving:next.moving,name:next.name.trim()||'Guest',note:next.note??''})});if(!response.ok)return response.status===401?'invalid':'rejected';const payload=await response.json() as {viewer?:OfficeViewer};if(payload.viewer){const local=viewerRef.current,movementUnchanged=!local||local.position.x===next.position.x&&local.position.y===next.position.y&&local.direction===next.direction&&local.moving===next.moving,nameUnchanged=!local||local.name===next.name,noteUnchanged=!local||local.note===next.note,merged=local?{...local,position:movementUnchanged?payload.viewer.position:local.position,direction:movementUnchanged?payload.viewer.direction:local.direction,moving:movementUnchanged?payload.viewer.moving:local.moving,name:nameUnchanged?payload.viewer.name:local.name,note:noteUnchanged?payload.viewer.note:local.note,lastSeenAt:payload.viewer.lastSeenAt}:payload.viewer;save({token:session.token,viewer:merged});if(!disposed){setViewer(merged);lastSentRef.current=Date.now();}}return 'ok';}catch{return 'rejected';}};
   const create=async()=>{if(connectingRef.current||disposed)return;connectingRef.current=true;try{let saved:SavedSession|undefined;try{saved=JSON.parse(sessionStorage.getItem(SESSION_KEY)||'') as SavedSession;}catch{/* stale or malformed session */}if(saved?.token&&saved.viewer&&(await move(saved,saved.viewer))==='ok'){tokenRef.current=saved.token;return;}const response=await fetch('/api/viewers/session',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({name:saved?.viewer?.name||randomName(),avatarStyle:saved?.viewer?.avatarStyle??Math.floor(Math.random()*8)})});if(!response.ok)return;const payload=await response.json() as {token:string;viewer:OfficeViewer};if(!payload.token||!payload.viewer)return;tokenRef.current=payload.token;setViewer(payload.viewer);save({token:payload.token,viewer:payload.viewer});lastSentRef.current=Date.now();}catch{/* viewer mode is optional when the API is unavailable */}finally{connectingRef.current=false;}};
   void create();
   const pressed=new Set<string>();

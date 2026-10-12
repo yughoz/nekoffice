@@ -134,7 +134,7 @@ npm start
 
 Receiver juga tersedia dalam `npm run preview`; server produksi mandiri tersedia dalam `npm start`. Hosting file `dist` saja tidak menjalankan API. Node 22.12+ diperlukan. Store tampilan ada di memori: refresh browser memulihkan dari server; restart server dikembalikan oleh heartbeat client Hermes berikutnya, atau script manual mengirim ulang status terakhir.
 
-Development bind ke `127.0.0.1`; server produksi memakai `HOST` dan `PORT` dari `.env`. Batas 64 agent dan body 64 KiB. Browser viewer dibatasi `OFFICE_MAX_VIEWERS=3` secara default; ubah nilai itu di `.env` bila perlu. Viewer tidak dapat berjalan melewati area meja karena collision divalidasi di client dan server. Viewer dapat mengganti nama karakter dan mengirim catatan maksimal 50 karakter. Cross-origin browser writes ditolak. Client mesin lain memakai server pusat dengan token dan URL HTTPS pada deployment lu.
+Development bind ke `127.0.0.1`; server produksi memakai `HOST` dan `PORT` dari `.env`. Batas 64 agent dan body 64 KiB. Browser viewer dibatasi `OFFICE_MAX_VIEWERS=3` secara default; ubah nilai itu di `.env` bila perlu. Viewer tidak dapat berjalan melewati area meja karena collision divalidasi di client dan server. Viewer dapat mengganti nama karakter sampai 5 karakter dan mengirim catatan maksimal 50 karakter. Cross-origin browser writes ditolak. Client mesin lain memakai server pusat dengan token dan URL HTTPS pada deployment lu.
 
 Struktur utama: `src/App.tsx` untuk UI sederhana, `src/OfficeScene.ts` untuk animasi, `src/officeModel.ts` untuk kontrak, `server/store.ts` untuk state tampilan, dan `server/viewerPlugin.ts` untuk adapter HTTP/SSE. Server ini tidak berisi scheduler atau agent runner.
 
