@@ -26,7 +26,7 @@ Rilis ini menyempurnakan viewer realtime v0.5 dengan collision meja, catatan sin
 }
 ```
 
-`name` dibatasi 5 karakter. `note` boleh dikosongkan untuk menghapus bubble. Token viewer tetap ephemeral di `sessionStorage`; token tidak masuk snapshot publik.
+`name` dibatasi 5 karakter. `note` boleh dikosongkan untuk menghapus bubble. Token viewer tetap ephemeral di `sessionStorage`; token tidak masuk snapshot publik. Saat browser reload, token dipakai kembali supaya avatar, posisi, nama, dan note tetap ada. Session yang benar-benar tidak aktif dibersihkan server setelah TTL 45 detik.
 
 ## Validasi
 

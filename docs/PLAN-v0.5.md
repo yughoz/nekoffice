@@ -12,7 +12,7 @@ v0.5 menambahkan karakter penonton yang muncul di kantor dan bisa digerakkan den
 - Server membatasi maksimal 3 viewer aktif secara default; batas dapat diubah dengan `OFFICE_MAX_VIEWERS`.
 - Viewer tidak bisa berjalan melewati area meja; posisi divalidasi ulang di server.
 - Viewer dapat mengganti nama karakter dan mengirim catatan singkat maksimal 50 karakter yang tampil sebagai bubble di atas kepala.
-- Menutup tab mengirim leave event; jika event tidak terkirim, TTL tetap membersihkan session.
+- Session yang tidak mengirim heartbeat selama 45 detik dianggap pulang dan dibersihkan server. Token yang tersimpan di tab dipulihkan saat reload agar posisi, nama, dan note tetap konsisten.
 - Avatar memakai aset karakter kantor yang sama dengan tint berbeda dan label `Penonton-xxx`.
 
 ## Endpoint
