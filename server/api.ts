@@ -5,6 +5,8 @@ import {RemoteClients} from './remoteClients.js';
 import {OfficeHistory} from './history.js';
 import {DeviceTokenStore,type DeviceProvider} from './deviceTokens.js';
 import type {ApiMirror} from './mirror.js';
+import {ViewerRegistry} from './viewers.js';
+import type {ViewerDirection} from '../src/officeModel.js';
 
 type Options={token?:string;localHealth?:()=>unknown;historyPath?:string;deviceTokensPath?:string;mirror?:ApiMirror};
 export function createOfficeApi(options:Options={}){
@@ -13,6 +15,7 @@ export function createOfficeApi(options:Options={}){
  const deviceTokens=new DeviceTokenStore(options.deviceTokensPath);
  const snapshot=()=>`event: office\ndata: ${JSON.stringify(store.get())}\n\n`;
  const publish=()=>{for(const client of clients)if(!client.destroyed)client.write(snapshot());};
+ const viewers=new ViewerRegistry(),viewerSweep=setInterval(()=>{for(const id of viewers.prune()){store.removeViewer(id);publish();}},10000);viewerSweep.unref();
  const remote=new RemoteClients(store,publish),codex=new RemoteClients(store,publish,Date.now,'codex');
  function json(res:ServerResponse,status:number,body:unknown){res.writeHead(status,{'Content-Type':'application/json','Cache-Control':'no-store'});res.end(JSON.stringify(body));}
  function authorized(req:IncomingMessage):'master'|'device'|null {const header=req.headers.authorization??'';if(!header.startsWith('Bearer '))return null;const presented=header.slice(7);if(options.token&&timingSafeEqual(createHash('sha256').update(presented).digest(),createHash('sha256').update(options.token).digest()))return 'master';return deviceTokens.matches(presented)?'device':null;}
@@ -27,6 +30,16 @@ export function createOfficeApi(options:Options={}){
   if(req.method==='GET'&&path==='/api/integrations'){json(res,200,{serverNow:Date.now(),clients:[...remote.getRegistry(),...codex.getRegistry()]});return;}
   if(req.method==='GET'&&path==='/api/integrations/mirror'){json(res,200,options.mirror?.getStatus()??{enabled:false,target:null,forwarded:0,failed:0,lastSuccessAt:null,lastFailureAt:null,lastStatus:null,lastError:null});return;}
   if(req.method==='GET'&&path==='/api/history'){const url=new URL(req.url||'/api/history','http://office.local');json(res,200,history.list(Number(url.searchParams.get('limit')||50),Number(url.searchParams.get('cursor')||0)));return;}
+  if(path==='/api/viewers/session'){
+   if(req.method!=='POST'){json(res,405,{ok:false,error:'Method not allowed.'});return;}if(!allowedOrigin(req)){json(res,403,{ok:false,error:'Cross-origin writes are not allowed.'});return;}if(!req.headers['content-type']?.startsWith('application/json')){json(res,415,{ok:false,error:'Use Content-Type: application/json.'});return;}
+   try{const body=await readJson(req) as Record<string,unknown>,name=typeof body.name==='string'&&body.name.trim()?body.name.trim():'Penonton',avatarStyle=typeof body.avatarStyle==='number'&&Number.isInteger(body.avatarStyle)&&body.avatarStyle>=0&&body.avatarStyle<=7?body.avatarStyle:0;const created=viewers.create({name:name.slice(0,32),avatarStyle,position:{x:384,y:440}});store.upsertViewer(created.viewer);publish();json(res,201,{ok:true,viewer:created.viewer,token:created.token});}catch(error){json(res,error instanceof Error&&error.message==='Viewer capacity is full.'?429:400,{ok:false,error:error instanceof Error?error.message:'Could not create viewer session.'});}return;
+  }
+  if(path==='/api/viewers/move'||path==='/api/viewers/leave'){
+   if(req.method!=='POST'){json(res,405,{ok:false,error:'Method not allowed.'});return;}if(!allowedOrigin(req)){json(res,403,{ok:false,error:'Cross-origin writes are not allowed.'});return;}const header=req.headers.authorization??'';const token=header.startsWith('Bearer ')?header.slice(7):'';if(!token){json(res,401,{ok:false,error:'Viewer token required.'});return;}
+   if(path==='/api/viewers/leave'){const removed=viewers.remove(token);if(!removed){json(res,401,{ok:false,error:'Invalid viewer token.'});return;}store.removeViewer(removed.id);publish();json(res,200,{ok:true});return;}
+   if(!req.headers['content-type']?.startsWith('application/json')){json(res,415,{ok:false,error:'Use Content-Type: application/json.'});return;}
+   try{const body=await readJson(req) as Record<string,unknown>,p=body.position as Record<string,unknown>|undefined;if(!p||typeof p.x!=='number'||typeof p.y!=='number'||!Number.isFinite(p.x)||!Number.isFinite(p.y)||p.x<24||p.x>744||p.y<92||p.y>470)throw new EventError('position must be inside the walkable office.');const direction=body.direction;if(direction!=='up'&&direction!=='down'&&direction!=='left'&&direction!=='right')throw new EventError('direction must be up, down, left, or right.');const viewer=viewers.update(token,{x:p.x,y:p.y},direction as ViewerDirection,body.moving===true);if(!viewer){json(res,401,{ok:false,error:'Invalid viewer token.'});return;}store.upsertViewer(viewer);publish();json(res,200,{ok:true,viewer});}catch(error){json(res,error instanceof EventError?error.status:400,{ok:false,error:error instanceof EventError?error.message:'Could not move viewer.'});}return;
+  }
   if(path==='/api/device-tokens'){
    if(req.method==='GET'){if(authorized(req)!=='master'){json(res,401,{ok:false,error:'Admin token required.'});return;}json(res,200,{items:deviceTokens.list()});return;}
    if(req.method!=='POST'){json(res,405,{ok:false,error:'Method not allowed.'});return;}
@@ -55,5 +68,5 @@ export function createOfficeApi(options:Options={}){
    const result=store.apply(path==='/api/agents'?{type:'agent.upsert',agent:body}:body);if(!result.duplicate){const snap=store.get();const changed=snap.agents.find(a=>a.id===((body as any)?.agent?.id||(body as any)?.id));if(changed)history.update(changed,changed.status!=='done',changed.status==='done'?'completed':'observed');publish();if(!mirrored)void options.mirror?.forward(path,body);}json(res,200,{ok:true,...result});
   }catch(error){json(res,error instanceof EventError?error.status:500,{ok:false,error:error instanceof EventError?error.message:'Server could not process this event.'});}
  }
- return {store,remote,codex,history,deviceTokens,publish,middleware,start:()=>{remote.start();codex.start();},close:()=>{remote.stop();codex.stop();options.mirror?.close();for(const client of clients)client.end();clients.clear();}};
+ return {store,remote,codex,history,deviceTokens,viewers,publish,middleware,start:()=>{remote.start();codex.start();},close:()=>{clearInterval(viewerSweep);viewers.clear();remote.stop();codex.stop();options.mirror?.close();for(const client of clients)client.end();clients.clear();}};
 }

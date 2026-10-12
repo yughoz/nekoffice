@@ -1,15 +1,16 @@
 import Phaser from 'phaser';
-import {roomInfo,statusInfo,type OfficeAgent,type OfficeSnapshot,type Room} from './officeModel';
+import {roomInfo,statusInfo,type OfficeAgent,type OfficeSnapshot,type OfficeViewer,type Room} from './officeModel';
 import {findPath,type Point} from './navigation';
 import {seat,station,seatCount,doorway,agentSeed,subagentPosition} from './officeLayout';
 import {drawOpenOffice,drawScreen} from './openOfficeArt';
 import {sceneLabel,syncSceneLabel,type SceneLabel} from './sceneLabels';
 interface AtlasManifest {frame_layout:{rows:Record<string,{x:number;y:number;w:number;h:number}[]>};animation:{rows:Record<string,{fps:number;loop:boolean}>};}
 interface VisualAgent {root:Phaser.GameObjects.Container;body:Phaser.GameObjects.Sprite;ring:Phaser.GameObjects.Ellipse;badge:Phaser.GameObjects.Arc;groupBadge:SceneLabel;name:SceneLabel;bubble:SceneLabel;path:Point[];action:string;signature:string;team:Room;hands:Phaser.GameObjects.Container[];chair:Phaser.GameObjects.Container;seatIndex:number;subagent:boolean;phase:'entering'|'working'|'leaving'|'gone';pace:number;}
+interface VisualViewer {root:Phaser.GameObjects.Container;body:Phaser.GameObjects.Sprite;ring:Phaser.GameObjects.Ellipse;name:SceneLabel;action:string;}
 export interface SceneView {snapshot:OfficeSnapshot;paused:boolean;selected:string|null;reducedMotion:boolean;}
 export interface SceneBridge {view:SceneView;select:(id:string)=>void;ready:()=>void;error:(message:string)=>void;followChanged:(value:boolean)=>void;}
 export class OfficeScene extends Phaser.Scene {
- bridge:SceneBridge;avatars=new Map<string,VisualAgent>();followed?:string;epoch='';panStart?:Point;cameraStart?:Point;manifest?:AtlasManifest;fitZoom=1;selecting=false;lastWidth=0;lastHeight=0;locations=new Map<string,number>();art?:ReturnType<typeof drawOpenOffice>;capacity=0;motionTime=0;screenSignature='';frameAgents:OfficeAgent[]=[];frameAgentIds=new Set<string>();frameAgentById=new Map<string,OfficeAgent>();frameChildrenByParent=new Map<string,OfficeAgent[]>();
+ bridge:SceneBridge;avatars=new Map<string,VisualAgent>();viewerAvatars=new Map<string,VisualViewer>();followed?:string;epoch='';panStart?:Point;cameraStart?:Point;manifest?:AtlasManifest;fitZoom=1;selecting=false;lastWidth=0;lastHeight=0;locations=new Map<string,number>();art?:ReturnType<typeof drawOpenOffice>;capacity=0;motionTime=0;screenSignature='';frameAgents:OfficeAgent[]=[];frameAgentIds=new Set<string>();frameAgentById=new Map<string,OfficeAgent>();frameChildrenByParent=new Map<string,OfficeAgent[]>();
  constructor(bridge:SceneBridge){super('office');this.bridge=bridge;}
  preload(){this.load.json('worker-manifest','/assets/worker.manifest.json');for(const team of Object.keys(roomInfo))this.load.image(`worker-${team}`,`/assets/worker-${team}.png`);this.load.on('loaderror',()=>this.bridge.error('Aset kantor belum bisa dimuat. Coba muat ulang.'));}
  create(){
@@ -36,11 +37,12 @@ export class OfficeScene extends Phaser.Scene {
   const chair=this.add.container(0,0,[this.add.rectangle(0,1,25,11,0x748867),this.add.rectangle(0,-4,27,4,0x93a07e)]);root.add([...hands,chair]);hands.forEach(h=>h.setVisible(false));chair.setVisible(false);body.play(`${agent.team}-idle`);
   const visual:VisualAgent={root,body,ring,badge,groupBadge,name,bubble,path:[],action:'idle',signature:'',team:agent.team,hands,chair,seatIndex:this.stationIndex(agent),subagent,phase:agent.status==='done'?'gone':'entering',pace:(subagent?46:52)+agentSeed(agent.id)%15};root.setVisible(visual.phase!=='gone');root.setAlpha(.4);this.avatars.set(agent.id,visual);return visual;
  }
- update(_time:number,delta:number){if(!this.manifest)return;const view=this.bridge.view;const agents=view.snapshot.agents;
+ addViewer(viewer:OfficeViewer){const root=this.add.container(viewer.position.x,viewer.position.y),ring=this.add.ellipse(0,-2,32,11).setStrokeStyle(2,0xe0a85d),body=this.add.sprite(0,3,'worker-coord','idle-0').setOrigin(.5,1).setScale(.9),name=sceneLabel(this,0,8,viewer.name,'name').setOrigin(.5,0) as SceneLabel;body.setTint([0xffffff,0xffeee3,0xe7f0ff,0xf3e9ff,0xfff1c7,0xe5f5e8,0xffe6f0,0xe5f0f5][viewer.avatarStyle%8]);root.add([ring,body,name]);root.setDepth(viewer.position.y+50);return {root,body,ring,name,action:''} as VisualViewer;}
+ update(_time:number,delta:number){if(!this.manifest)return;const view=this.bridge.view;const agents=view.snapshot.agents,viewers=view.snapshot.viewers||[];
   this.frameAgents=agents;this.frameAgentIds.clear();this.frameAgentById.clear();this.frameChildrenByParent.clear();
   for(const agent of agents){this.frameAgentIds.add(agent.id);this.frameAgentById.set(agent.id,agent);if(agent.parentId){const children=this.frameChildrenByParent.get(agent.parentId);if(children)children.push(agent);else this.frameChildrenByParent.set(agent.parentId,[agent]);}}
   for(const children of this.frameChildrenByParent.values())children.sort((a,b)=>a.id.localeCompare(b.id));
-  if(view.snapshot.epoch!==this.epoch){this.epoch=view.snapshot.epoch;for(const a of this.avatars.values())a.root.destroy();this.avatars.clear();this.locations.clear();this.rebuildOffice(agents.length);}
+  if(view.snapshot.epoch!==this.epoch){this.epoch=view.snapshot.epoch;for(const a of this.avatars.values())a.root.destroy();for(const viewer of this.viewerAvatars.values())viewer.root.destroy();this.avatars.clear();this.viewerAvatars.clear();this.locations.clear();this.rebuildOffice(agents.length);}
   for(const [id,a] of this.avatars)if(!this.frameAgentIds.has(id)){a.root.destroy();this.avatars.delete(id);this.locations.delete(id);if(this.followed===id)this.stopFollow();}
   const rootCount=agents.reduce((count,agent)=>count+(agent.parentId?0:1),0);const count=Math.max(rootCount,...[...this.locations.values()].map(i=>i+1));if(seatCount(count)!==this.capacity)this.rebuildOffice(count);
   if(!view.paused&&!view.reducedMotion)this.motionTime+=delta;
@@ -73,6 +75,8 @@ export class OfficeScene extends Phaser.Scene {
    a.hands.forEach((hand,i)=>{hand.setVisible(typing);hand.y=-25+(typing&&!view.reducedMotion?Math.floor(this.motionTime/110+a.seatIndex+i)%2*2:0);});
    if(animation!==a.action){a.action=animation;if(animation!=='seated')a.body.play(`${agent.team}-${animation}`,true);}if(!seated){if(view.paused||view.reducedMotion)a.body.anims.pause();else a.body.anims.resume();}a.badge.setFillStyle(statusInfo[agent.status].color);a.ring.setVisible(view.selected===agent.id);a.root.setDepth(a.root.y+50);
   }
+  const viewerIds=new Set(viewers.map(viewer=>viewer.id));for(const [id,visual] of this.viewerAvatars){if(!viewerIds.has(id)){visual.root.destroy();this.viewerAvatars.delete(id);}}
+  for(const viewer of viewers){const visual=this.viewerAvatars.get(viewer.id)??this.addViewer(viewer);this.viewerAvatars.set(viewer.id,visual);visual.root.setVisible(true).setPosition(viewer.position.x,viewer.position.y).setDepth(viewer.position.y+60);syncSceneLabel(visual.name,viewer.name,this.cameras.main.zoom,viewer.position.y+60);visual.ring.setVisible(true);let animation='idle';if(viewer.moving&&!view.reducedMotion){animation=viewer.direction==='left'||viewer.direction==='right'?'walk_side':viewer.direction==='up'?'walk_up':'walk_down';visual.body.setFlipX(viewer.direction==='left');}else visual.body.setFlipX(false);if(animation!==visual.action){visual.action=animation;visual.body.play(`coord-${animation}`,true);}if(view.paused||view.reducedMotion)visual.body.anims.pause();else visual.body.anims.resume();}
   if(this.art)syncSceneLabel(this.art.doorLabel,'PINTU',this.cameras.main.zoom,0);
   if(this.followed&&view.selected&&this.followed!==view.selected)this.follow(view.selected);
  }

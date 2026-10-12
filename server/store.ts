@@ -1,4 +1,4 @@
-import type {AgentPatch,OfficeAgent,OfficeEvent,OfficeSnapshot,Room,AgentStatus,ActivityCode} from '../src/officeModel.js';
+import type {AgentPatch,OfficeAgent,OfficeEvent,OfficeSnapshot,OfficeViewer,Room,AgentStatus,ActivityCode} from '../src/officeModel.js';
 const rooms:Room[]=['coord','research','creative','production','qa'];
 const statuses:AgentStatus[]=['idle','working','thinking','waiting','error','done'];
 const activities:ActivityCode[]=['generic','edit','command','test','research','thinking','waiting','error'];
@@ -35,8 +35,10 @@ export function parseEvent(raw:unknown):OfficeEvent {
 }
 export class OfficeStore {
  private snapshot:OfficeSnapshot;private seen=new Set<string>();
- constructor(epoch='local'){this.snapshot={epoch,revision:0,title:'NekOffice',agents:[]};}
+ constructor(epoch='local'){this.snapshot={epoch,revision:0,title:'NekOffice',agents:[],viewers:[]};}
  get():OfficeSnapshot {return structuredClone(this.snapshot);}
+ upsertViewer(viewer:OfficeViewer):number {const index=this.snapshot.viewers.findIndex(item=>item.id===viewer.id);if(index<0)this.snapshot.viewers.push(viewer);else this.snapshot.viewers[index]=viewer;this.snapshot.revision+=1;return this.snapshot.revision;}
+ removeViewer(id:string):number {const before=this.snapshot.viewers.length;this.snapshot.viewers=this.snapshot.viewers.filter(viewer=>viewer.id!==id);if(this.snapshot.viewers.length!==before)this.snapshot.revision+=1;return this.snapshot.revision;}
  apply(raw:unknown):{duplicate:boolean;revision:number}{const e=parseEvent(raw);if(e.eventId&&this.seen.has(e.eventId))return {duplicate:true,revision:this.snapshot.revision};const revision=this.snapshot.revision+1;
   if(e.type==='agent.upsert'){const index=this.snapshot.agents.findIndex(a=>a.id===e.agent.id),previous=this.snapshot.agents[index];if(index<0&&this.snapshot.agents.length>=64)throw new EventError('Office capacity is 64 agents.',409);
    const a=e.agent;const next:OfficeAgent={...(previous||{id:a.id,name:a.id,role:'Agent',team:'research' as Room,room:'research' as Room,status:'idle' as AgentStatus,task:''}),...a,parentId:a.parentId===null?undefined:a.parentId??previous?.parentId,progress:a.progress===null?undefined:a.progress??previous?.progress,revision};
