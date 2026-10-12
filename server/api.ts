@@ -8,7 +8,7 @@ import type {ApiMirror} from './mirror.js';
 import {ViewerRegistry} from './viewers.js';
 import type {ViewerDirection} from '../src/officeModel.js';
 import {isWalkable} from '../src/navigation.js';
-import {roomHeight} from '../src/officeLayout.js';
+import {doorway,roomHeight} from '../src/officeLayout.js';
 
 type Options={token?:string;localHealth?:()=>unknown;historyPath?:string;deviceTokensPath?:string;mirror?:ApiMirror;maxViewers?:number};
 export function createOfficeApi(options:Options={}){
@@ -34,7 +34,7 @@ export function createOfficeApi(options:Options={}){
   if(req.method==='GET'&&path==='/api/history'){const url=new URL(req.url||'/api/history','http://office.local');json(res,200,history.list(Number(url.searchParams.get('limit')||50),Number(url.searchParams.get('cursor')||0)));return;}
   if(path==='/api/viewers/session'){
    if(req.method!=='POST'){json(res,405,{ok:false,error:'Method not allowed.'});return;}if(!allowedOrigin(req)){json(res,403,{ok:false,error:'Cross-origin writes are not allowed.'});return;}if(!req.headers['content-type']?.startsWith('application/json')){json(res,415,{ok:false,error:'Use Content-Type: application/json.'});return;}
-   try{const body=await readJson(req) as Record<string,unknown>,name=typeof body.name==='string'&&body.name.trim()?body.name.trim():'Guest',avatarStyle=typeof body.avatarStyle==='number'&&Number.isInteger(body.avatarStyle)&&body.avatarStyle>=0&&body.avatarStyle<=7?body.avatarStyle:0;const created=viewers.create({name:name.slice(0,5),avatarStyle,position:{x:384,y:440}});store.upsertViewer(created.viewer);publish();json(res,201,{ok:true,viewer:created.viewer,token:created.token});}catch(error){json(res,error instanceof Error&&error.message==='Viewer capacity is full.'?429:400,{ok:false,error:error instanceof Error?error.message:'Could not create viewer session.'});}return;
+   try{const body=await readJson(req) as Record<string,unknown>,name=typeof body.name==='string'&&body.name.trim()?body.name.trim():'Guest',avatarStyle=typeof body.avatarStyle==='number'&&Number.isInteger(body.avatarStyle)&&body.avatarStyle>=0&&body.avatarStyle<=7?body.avatarStyle:0,rootCount=store.get().agents.reduce((count,agent)=>count+(agent.parentId?0:1),0),officeCount=Math.max(15,rootCount);const created=viewers.create({name:name.slice(0,5),avatarStyle,position:doorway(officeCount)});store.upsertViewer(created.viewer);publish();json(res,201,{ok:true,viewer:created.viewer,token:created.token});}catch(error){json(res,error instanceof Error&&error.message==='Viewer capacity is full.'?429:400,{ok:false,error:error instanceof Error?error.message:'Could not create viewer session.'});}return;
   }
   if(path==='/api/viewers/move'||path==='/api/viewers/leave'){
    if(req.method!=='POST'){json(res,405,{ok:false,error:'Method not allowed.'});return;}if(!allowedOrigin(req)){json(res,403,{ok:false,error:'Cross-origin writes are not allowed.'});return;}const header=req.headers.authorization??'';const token=header.startsWith('Bearer ')?header.slice(7):'';if(!token){json(res,401,{ok:false,error:'Viewer token required.'});return;}
