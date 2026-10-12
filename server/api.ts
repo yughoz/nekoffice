@@ -7,15 +7,17 @@ import {DeviceTokenStore,type DeviceProvider} from './deviceTokens.js';
 import type {ApiMirror} from './mirror.js';
 import {ViewerRegistry} from './viewers.js';
 import type {ViewerDirection} from '../src/officeModel.js';
+import {isWalkable} from '../src/navigation.js';
+import {roomHeight} from '../src/officeLayout.js';
 
-type Options={token?:string;localHealth?:()=>unknown;historyPath?:string;deviceTokensPath?:string;mirror?:ApiMirror};
+type Options={token?:string;localHealth?:()=>unknown;historyPath?:string;deviceTokensPath?:string;mirror?:ApiMirror;maxViewers?:number};
 export function createOfficeApi(options:Options={}){
  const store=new OfficeStore(randomUUID()),clients=new Set<ServerResponse>();
  const history=new OfficeHistory(options.historyPath);
  const deviceTokens=new DeviceTokenStore(options.deviceTokensPath);
  const snapshot=()=>`event: office\ndata: ${JSON.stringify(store.get())}\n\n`;
  const publish=()=>{for(const client of clients)if(!client.destroyed)client.write(snapshot());};
- const viewers=new ViewerRegistry(),viewerSweep=setInterval(()=>{for(const id of viewers.prune()){store.removeViewer(id);publish();}},10000);viewerSweep.unref();
+ const viewers=new ViewerRegistry(Date.now,options.maxViewers),viewerSweep=setInterval(()=>{for(const id of viewers.prune()){store.removeViewer(id);publish();}},10000);viewerSweep.unref();
  const remote=new RemoteClients(store,publish),codex=new RemoteClients(store,publish,Date.now,'codex');
  function json(res:ServerResponse,status:number,body:unknown){res.writeHead(status,{'Content-Type':'application/json','Cache-Control':'no-store'});res.end(JSON.stringify(body));}
  function authorized(req:IncomingMessage):'master'|'device'|null {const header=req.headers.authorization??'';if(!header.startsWith('Bearer '))return null;const presented=header.slice(7);if(options.token&&timingSafeEqual(createHash('sha256').update(presented).digest(),createHash('sha256').update(options.token).digest()))return 'master';return deviceTokens.matches(presented)?'device':null;}
@@ -38,7 +40,7 @@ export function createOfficeApi(options:Options={}){
    if(req.method!=='POST'){json(res,405,{ok:false,error:'Method not allowed.'});return;}if(!allowedOrigin(req)){json(res,403,{ok:false,error:'Cross-origin writes are not allowed.'});return;}const header=req.headers.authorization??'';const token=header.startsWith('Bearer ')?header.slice(7):'';if(!token){json(res,401,{ok:false,error:'Viewer token required.'});return;}
    if(path==='/api/viewers/leave'){const removed=viewers.remove(token);if(!removed){json(res,401,{ok:false,error:'Invalid viewer token.'});return;}store.removeViewer(removed.id);publish();json(res,200,{ok:true});return;}
    if(!req.headers['content-type']?.startsWith('application/json')){json(res,415,{ok:false,error:'Use Content-Type: application/json.'});return;}
-   try{const body=await readJson(req) as Record<string,unknown>,p=body.position as Record<string,unknown>|undefined;if(!p||typeof p.x!=='number'||typeof p.y!=='number'||!Number.isFinite(p.x)||!Number.isFinite(p.y)||p.x<24||p.x>744||p.y<92||p.y>470)throw new EventError('position must be inside the walkable office.');const direction=body.direction;if(direction!=='up'&&direction!=='down'&&direction!=='left'&&direction!=='right')throw new EventError('direction must be up, down, left, or right.');const viewer=viewers.update(token,{x:p.x,y:p.y},direction as ViewerDirection,body.moving===true);if(!viewer){json(res,401,{ok:false,error:'Invalid viewer token.'});return;}store.upsertViewer(viewer);publish();json(res,200,{ok:true,viewer});}catch(error){json(res,error instanceof EventError?error.status:400,{ok:false,error:error instanceof EventError?error.message:'Could not move viewer.'});}return;
+   try{const body=await readJson(req) as Record<string,unknown>,p=body.position as Record<string,unknown>|undefined,rootCount=store.get().agents.reduce((count,agent)=>count+(agent.parentId?0:1),0),officeCount=Math.max(15,rootCount);if(!p||typeof p.x!=='number'||typeof p.y!=='number'||!Number.isFinite(p.x)||!Number.isFinite(p.y)||p.x<24||p.x>744||p.y<92||p.y>roomHeight(officeCount)-8)throw new EventError('position must be inside the walkable office.');if(!isWalkable(p.x,p.y,officeCount))throw new EventError('position is blocked by a desk.');const direction=body.direction;if(direction!=='up'&&direction!=='down'&&direction!=='left'&&direction!=='right')throw new EventError('direction must be up, down, left, or right.');let note:string|undefined;if(Object.prototype.hasOwnProperty.call(body,'note')){if(typeof body.note!=='string'||body.note.length>80)throw new EventError('note must be a string, max 80 characters.');note=body.note.trim().slice(0,80);}const viewer=viewers.update(token,{x:p.x,y:p.y},direction as ViewerDirection,body.moving===true,note);if(!viewer){json(res,401,{ok:false,error:'Invalid viewer token.'});return;}store.upsertViewer(viewer);publish();json(res,200,{ok:true,viewer});}catch(error){json(res,error instanceof EventError?error.status:400,{ok:false,error:error instanceof EventError?error.message:'Could not move viewer.'});}return;
   }
   if(path==='/api/device-tokens'){
    if(req.method==='GET'){if(authorized(req)!=='master'){json(res,401,{ok:false,error:'Admin token required.'});return;}json(res,200,{items:deviceTokens.list()});return;}

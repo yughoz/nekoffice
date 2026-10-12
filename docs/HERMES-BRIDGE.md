@@ -60,7 +60,7 @@ LITTLE_OFFICE_MACHINE_LABEL_MODE=hidden
 
 `alias` adalah default dan memakai salt lokal permission `0600`; nama folder asli tidak dikirim. Gunakan `project` hanya pada server private, `random` bila alias perlu berubah tiap session, atau `hidden` bila project sama sekali tidak boleh tampil. `LITTLE_OFFICE_MACHINE_LABEL_MODE=show` hanya aman untuk jaringan private.
 
-Metadata ditulis atomik ke `~/.hermes/plugins/little-office-bridge/spool`, satu file per proses plugin. Semua profile memakai lokasi metadata yang sama. Viewer dev dan preview membaca lokasi ini, lalu menyiarkan snapshot melalui SSE yang sudah dipakai aplikasi. Setelah restart viewer, session masih aktif dipulihkan dari metadata; pekerjaan lama yang sudah selesai tidak dimainkan ulang. Manual API tetap tersedia dan berbagi batas kapasitas 64 orang.
+Metadata ditulis atomik ke `~/.hermes/plugins/little-office-bridge/spool`, satu file per proses plugin. Semua profile memakai lokasi metadata yang sama. Viewer dev dan preview membaca lokasi ini, lalu menyiarkan snapshot melalui SSE yang sudah dipakai aplikasi. Setelah restart viewer, session masih aktif dipulihkan dari metadata; pekerjaan lama yang sudah selesai tidak dimainkan ulang. Manual API tetap tersedia dan berbagi batas kapasitas viewer yang dikonfigurasi lewat `OFFICE_MAX_VIEWERS` (default 3).
 
 Lokasi alternatif: set `LITTLE_OFFICE_HERMES_SPOOL` ke direktori yang sama pada proses Hermes dan server viewer sebelum dijalankan. Metadata tetap lokal pada mesin ini.
 

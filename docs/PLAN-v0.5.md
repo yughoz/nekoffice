@@ -9,7 +9,9 @@ v0.5 menambahkan karakter penonton yang muncul di kantor dan bisa digerakkan den
 - Satu tab browser membuat satu session viewer ephemeral tanpa login.
 - Token viewer hanya disimpan di `sessionStorage` dan tidak pernah masuk snapshot publik.
 - Session yang tidak mengirim heartbeat selama 45 detik dihapus otomatis.
-- Server membatasi maksimal 32 viewer aktif.
+- Server membatasi maksimal 3 viewer aktif secara default; batas dapat diubah dengan `OFFICE_MAX_VIEWERS`.
+- Viewer tidak bisa berjalan melewati area meja; posisi divalidasi ulang di server.
+- Viewer dapat mengirim catatan singkat maksimal 80 karakter yang tampil sebagai bubble di atas kepala.
 - Menutup tab mengirim leave event; jika event tidak terkirim, TTL tetap membersihkan session.
 - Avatar memakai aset karakter kantor yang sama dengan tint berbeda dan label `Penonton-xxx`.
 
@@ -18,7 +20,7 @@ v0.5 menambahkan karakter penonton yang muncul di kantor dan bisa digerakkan den
 | Endpoint | Fungsi |
 | --- | --- |
 | `POST /api/viewers/session` | Membuat session viewer anonim dan token ephemeral |
-| `POST /api/viewers/move` | Memperbarui posisi, arah, dan status bergerak |
+| `POST /api/viewers/move` | Memperbarui posisi, arah, status bergerak, dan `note` opsional |
 | `POST /api/viewers/leave` | Menghapus session viewer saat tab ditutup |
 | `GET /api/stream` | Mengirim snapshot agent dan viewer ke semua browser |
 

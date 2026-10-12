@@ -4,7 +4,7 @@ export type AgentStatus = 'idle'|'working'|'thinking'|'waiting'|'error'|'done';
 export type ActivityCode='generic'|'edit'|'command'|'test'|'research'|'thinking'|'waiting'|'error';
 export type ViewerDirection='up'|'down'|'left'|'right';
 export interface OfficeAgent {id:string;name:string;role:string;team:Room;room:Room;parentId?:string;status:AgentStatus;task:string;progress?:number;position?:{x:number;y:number};revision:number;provider?:'codex'|'hermes'|'manual';machineId?:string;machineLabel?:string;bridgeVersion?:string;projectName?:string;projectKey?:string;activityCode?:ActivityCode;avatarStyle?:number;seatIndex?:number;}
-export interface OfficeViewer {id:string;name:string;avatarStyle:number;position:{x:number;y:number};direction:ViewerDirection;moving:boolean;lastSeenAt:number;}
+export interface OfficeViewer {id:string;name:string;avatarStyle:number;position:{x:number;y:number};direction:ViewerDirection;moving:boolean;note?:string;lastSeenAt:number;}
 export interface OfficeSnapshot {epoch:string;revision:number;title:string;agents:OfficeAgent[];viewers:OfficeViewer[];}
 export const roomInfo:Record<Room,{name:string;color:string}>={coord:{name:'Koordinator',color:'#56748c'},research:{name:'Tim riset',color:'#659b72'},creative:{name:'Tim kreatif',color:'#c886a0'},production:{name:'Tim produksi',color:'#9789b7'},qa:{name:'Tim QA',color:'#d9a078'}};
 export const statusInfo:Record<AgentStatus,{label:string;color:number}>={idle:{label:'Siaga',color:0xb3ae98},working:{label:'Bekerja',color:0x559571},thinking:{label:'Berpikir',color:0x799ac3},waiting:{label:'Menunggu',color:0xc8aa66},error:{label:'Perlu perhatian',color:0xc87445},done:{label:'Selesai',color:0x6c9d64}};

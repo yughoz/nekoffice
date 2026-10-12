@@ -12,7 +12,7 @@ function relativeTime(timestamp:number){if(!timestamp)return 'belum ada heartbea
 function clientStatus(client:OfficeClient){if(!client.connected)return 'Terputus';return Date.now()-client.lastHeartbeatAt>20000?'Terlambat':'Terhubung';}
 
 export default function App(){
- const {snapshot,mode,changeMode,connected,paused,setPaused,clients,history,filters,setFilters,projects,machines,localViewer}=useOffice();
+ const {snapshot,mode,changeMode,connected,paused,setPaused,clients,history,filters,setFilters,projects,machines,localViewer,setViewerNote}=useOffice();
  const [selected,setSelected]=useState<string|null>(null),[panel,setPanel]=useState<Panel>('none'),[addAgentOpen,setAddAgentOpen]=useState(false),[reducedMotion,setReducedMotion]=useState(()=>matchMedia('(prefers-reduced-motion: reduce)').matches);
  const agent=snapshot.agents.find(a=>a.id===selected),detailAgent=agent?.parentId?snapshot.agents.find(a=>a.id===agent.parentId):agent,children=detailAgent?snapshot.agents.filter(a=>a.parentId===detailAgent.id):[],working=snapshot.agents.filter(a=>a.status==='working'||a.status==='thinking').length;
  const togglePanel=(next:Panel)=>setPanel(current=>current===next?'none':next);
@@ -28,6 +28,7 @@ export default function App(){
    </div></header>
   <section className="office-window"><Office view={{snapshot,paused,selected,reducedMotion}} onSelect={setSelected}/>
    <div className="office-caption"><span><i/>{working} agent bekerja</span>{(filtersActive||mode==='demo')&&<><span className="caption-separator">·</span><span>{filtersActive?`${snapshot.agents.length} ditampilkan · filter aktif`:'Animasi contoh'}</span></>}{mode==='api'&&localViewer&&<><span className="caption-separator">·</span><span className="viewer-hint">{localViewer.name} · W A S D untuk bergerak</span></>}</div>
+   {mode==='api'&&localViewer&&<div className="viewer-note-control"><label htmlFor="viewer-note">Catatan singkat</label><input id="viewer-note" value={localViewer.note||''} maxLength={80} placeholder="Lagi ngapain?" onChange={event=>setViewerNote(event.target.value)}/><small>Muncul di atas kepala karakter</small></div>}
    {mode==='api'&&!snapshot.agents.length&&<div className="waiting-card"><Leaf size={26}/><h2>{filtersActive?'Tidak ada yang cocok.':'Kantor siap.'}</h2><p>{filtersActive?'Hapus filter untuk melihat agent lain.':clients.some(c=>c.connected)?'Semua sedang istirahat. Client tetap terhubung.':'Menunggu agent terhubung.'}</p>{filtersActive&&<button onClick={clearFilters}>Hapus filter</button>}</div>}
    {agent&&detailAgent&&<div className="agent-card" aria-label={'Detail '+detailAgent.name}>
     <button className="card-close" aria-label="Tutup detail" onClick={()=>setSelected(null)}><X size={15}/></button>
@@ -47,7 +48,7 @@ export default function App(){
    </aside>}
    {addAgentOpen&&<DeviceTokenModal onClose={()=>setAddAgentOpen(false)}/>}
   </section>
-  <footer className="office-footer"><span>Klik agent untuk melihat aktivitas <span className="office-footer-star">✦</span><small className="office-version" aria-label="Versi NekOffice">v0.5</small></span><div><button className={panel==='history'?'active':''} aria-label="Riwayat aktivitas" onClick={()=>togglePanel('history')}><History size={14}/><span>Riwayat</span></button><button className={reducedMotion?'active':''} aria-label={reducedMotion?'Aktifkan animasi':'Kurangi animasi'} title="Kurangi gerakan" onClick={()=>setReducedMotion(value=>!value)}><Sparkles size={15}/><span>{reducedMotion?'Gerakan minimal':'Cozy animation'}</span></button>{mode==='demo'&&<button aria-label={paused?'Lanjutkan demo':'Jeda demo'} onClick={()=>setPaused(value=>!value)}>{paused?<Play size={14}/>:<Pause size={14}/>}<span>{paused?'Lanjutkan':'Jeda'}</span></button>}<MusicPlayer/></div></footer>
+  <footer className="office-footer"><span>Klik agent untuk melihat aktivitas <span className="office-footer-star">✦</span><small className="office-version" aria-label="Versi NekOffice">v0.6</small></span><div><button className={panel==='history'?'active':''} aria-label="Riwayat aktivitas" onClick={()=>togglePanel('history')}><History size={14}/><span>Riwayat</span></button><button className={reducedMotion?'active':''} aria-label={reducedMotion?'Aktifkan animasi':'Kurangi animasi'} title="Kurangi gerakan" onClick={()=>setReducedMotion(value=>!value)}><Sparkles size={15}/><span>{reducedMotion?'Gerakan minimal':'Cozy animation'}</span></button>{mode==='demo'&&<button aria-label={paused?'Lanjutkan demo':'Jeda demo'} onClick={()=>setPaused(value=>!value)}>{paused?<Play size={14}/>:<Pause size={15}/>}<span>{paused?'Lanjutkan':'Jeda'}</span></button>}<MusicPlayer/></div></footer>
  </main>;
 }
 
