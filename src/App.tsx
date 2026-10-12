@@ -16,7 +16,7 @@ export default function App(){
  const [selected,setSelected]=useState<string|null>(null),[panel,setPanel]=useState<Panel>('none'),[addAgentOpen,setAddAgentOpen]=useState(false),[reducedMotion,setReducedMotion]=useState(()=>matchMedia('(prefers-reduced-motion: reduce)').matches);
  const agent=snapshot.agents.find(a=>a.id===selected),detailAgent=agent?.parentId?snapshot.agents.find(a=>a.id===agent.parentId):agent,children=detailAgent?snapshot.agents.filter(a=>a.parentId===detailAgent.id):[],working=snapshot.agents.filter(a=>a.status==='working'||a.status==='thinking').length;
  const togglePanel=(next:Panel)=>setPanel(current=>current===next?'none':next);
- useEffect(()=>{const key=(event:KeyboardEvent)=>{const tag=(event.target as HTMLElement)?.tagName;if(event.key==='Escape'){if(addAgentOpen)setAddAgentOpen(false);else{setSelected(null);setPanel('none')}}if(event.code==='Space'&&!['BUTTON','SELECT'].includes(tag)){if(!['INPUT','TEXTAREA'].includes(tag))event.preventDefault();setPaused(value=>!value);}};window.addEventListener('keydown',key);return()=>window.removeEventListener('keydown',key)},[addAgentOpen,setPaused]);
+ useEffect(()=>{const key=(event:KeyboardEvent)=>{const tag=(event.target as HTMLElement)?.tagName;if(event.key==='Escape'){if(addAgentOpen)setAddAgentOpen(false);else{setSelected(null);setPanel('none')}}if(event.code==='Space'&&!['INPUT','TEXTAREA','BUTTON','SELECT'].includes(tag)){event.preventDefault();setPaused(value=>!value);}};window.addEventListener('keydown',key);return()=>window.removeEventListener('keydown',key)},[addAgentOpen,setPaused]);
  const clearFilters=()=>setFilters({project:'',machine:'',provider:''});
  const filtersActive=Object.values(filters).some(Boolean);
  return <main className="office-app">
