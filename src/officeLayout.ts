@@ -1,4 +1,4 @@
-import type {Point} from './navigation';
+import type {Point} from './navigation.js';
 export const columns = 5;
 export const minimumSeats = 15;
 export function seatCount(agentCount:number) {return Math.ceil(Math.max(minimumSeats,agentCount)/columns)*columns;}

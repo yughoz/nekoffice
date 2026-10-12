@@ -1,4 +1,4 @@
-import {roomHeight,seatCount,station} from './officeLayout';
+import {roomHeight,seatCount,station} from './officeLayout.js';
 export interface Point {x:number;y:number;}
 const size=8,cols=96;
 // One open floor. Desktops are solid; chairs are walkable destinations.

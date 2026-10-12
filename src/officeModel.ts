@@ -1,4 +1,4 @@
-import {agentSeed} from './officeLayout';
+import {agentSeed} from './officeLayout.js';
 export type Room = 'coord'|'research'|'creative'|'production'|'qa';
 export type AgentStatus = 'idle'|'working'|'thinking'|'waiting'|'error'|'done';
 export type ActivityCode='generic'|'edit'|'command'|'test'|'research'|'thinking'|'waiting'|'error';
