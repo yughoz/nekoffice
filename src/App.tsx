@@ -12,11 +12,11 @@ function relativeTime(timestamp:number){if(!timestamp)return 'belum ada heartbea
 function clientStatus(client:OfficeClient){if(!client.connected)return 'Terputus';return Date.now()-client.lastHeartbeatAt>20000?'Terlambat':'Terhubung';}
 
 export default function App(){
- const {snapshot,mode,changeMode,connected,paused,setPaused,clients,history,filters,setFilters,projects,machines,localViewer,setViewerNote}=useOffice();
+ const {snapshot,mode,changeMode,connected,paused,setPaused,clients,history,filters,setFilters,projects,machines,localViewer,setViewerName,setViewerNote}=useOffice();
  const [selected,setSelected]=useState<string|null>(null),[panel,setPanel]=useState<Panel>('none'),[addAgentOpen,setAddAgentOpen]=useState(false),[reducedMotion,setReducedMotion]=useState(()=>matchMedia('(prefers-reduced-motion: reduce)').matches);
  const agent=snapshot.agents.find(a=>a.id===selected),detailAgent=agent?.parentId?snapshot.agents.find(a=>a.id===agent.parentId):agent,children=detailAgent?snapshot.agents.filter(a=>a.parentId===detailAgent.id):[],working=snapshot.agents.filter(a=>a.status==='working'||a.status==='thinking').length;
  const togglePanel=(next:Panel)=>setPanel(current=>current===next?'none':next);
- useEffect(()=>{const key=(event:KeyboardEvent)=>{if(event.key==='Escape'){if(addAgentOpen)setAddAgentOpen(false);else{setSelected(null);setPanel('none')}}if(event.code==='Space'&&mode==='demo'&&!['INPUT','BUTTON','SELECT'].includes((event.target as HTMLElement)?.tagName)){event.preventDefault();setPaused(value=>!value)}};window.addEventListener('keydown',key);return()=>window.removeEventListener('keydown',key)},[addAgentOpen,mode,setPaused]);
+ useEffect(()=>{const key=(event:KeyboardEvent)=>{const tag=(event.target as HTMLElement)?.tagName;if(event.key==='Escape'){if(addAgentOpen)setAddAgentOpen(false);else{setSelected(null);setPanel('none')}}if(event.code==='Space'&&!['INPUT','TEXTAREA','BUTTON','SELECT'].includes(tag)){event.preventDefault();if(mode==='demo')setPaused(value=>!value);}};window.addEventListener('keydown',key);return()=>window.removeEventListener('keydown',key)},[addAgentOpen,mode,setPaused]);
  const clearFilters=()=>setFilters({project:'',machine:'',provider:''});
  const filtersActive=Object.values(filters).some(Boolean);
  return <main className="office-app">
@@ -28,7 +28,7 @@ export default function App(){
    </div></header>
   <section className="office-window"><Office view={{snapshot,paused,selected,reducedMotion}} onSelect={setSelected}/>
    <div className="office-caption"><span><i/>{working} agent bekerja</span>{(filtersActive||mode==='demo')&&<><span className="caption-separator">·</span><span>{filtersActive?`${snapshot.agents.length} ditampilkan · filter aktif`:'Animasi contoh'}</span></>}{mode==='api'&&localViewer&&<><span className="caption-separator">·</span><span className="viewer-hint">{localViewer.name} · W A S D untuk bergerak</span></>}</div>
-   {mode==='api'&&localViewer&&<div className="viewer-note-control"><label htmlFor="viewer-note">Catatan singkat</label><input id="viewer-note" value={localViewer.note||''} maxLength={80} placeholder="Lagi ngapain?" onChange={event=>setViewerNote(event.target.value)}/><small>Muncul di atas kepala karakter</small></div>}
+   {mode==='api'&&localViewer&&<div className="viewer-note-control"><label htmlFor="viewer-name">Nama karakter</label><input id="viewer-name" value={localViewer.name} maxLength={32} placeholder="Penonton" onChange={event=>setViewerName(event.target.value)}/><label htmlFor="viewer-note">Catatan singkat</label><input id="viewer-note" value={localViewer.note||''} maxLength={50} placeholder="Lagi ngapain?" onChange={event=>setViewerNote(event.target.value)}/><small>Muncul di atas kepala karakter</small></div>}
    {mode==='api'&&!snapshot.agents.length&&<div className="waiting-card"><Leaf size={26}/><h2>{filtersActive?'Tidak ada yang cocok.':'Kantor siap.'}</h2><p>{filtersActive?'Hapus filter untuk melihat agent lain.':clients.some(c=>c.connected)?'Semua sedang istirahat. Client tetap terhubung.':'Menunggu agent terhubung.'}</p>{filtersActive&&<button onClick={clearFilters}>Hapus filter</button>}</div>}
    {agent&&detailAgent&&<div className="agent-card" aria-label={'Detail '+detailAgent.name}>
     <button className="card-close" aria-label="Tutup detail" onClick={()=>setSelected(null)}><X size={15}/></button>

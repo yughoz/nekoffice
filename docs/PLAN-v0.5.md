@@ -11,7 +11,7 @@ v0.5 menambahkan karakter penonton yang muncul di kantor dan bisa digerakkan den
 - Session yang tidak mengirim heartbeat selama 45 detik dihapus otomatis.
 - Server membatasi maksimal 3 viewer aktif secara default; batas dapat diubah dengan `OFFICE_MAX_VIEWERS`.
 - Viewer tidak bisa berjalan melewati area meja; posisi divalidasi ulang di server.
-- Viewer dapat mengirim catatan singkat maksimal 80 karakter yang tampil sebagai bubble di atas kepala.
+- Viewer dapat mengganti nama karakter dan mengirim catatan singkat maksimal 50 karakter yang tampil sebagai bubble di atas kepala.
 - Menutup tab mengirim leave event; jika event tidak terkirim, TTL tetap membersihkan session.
 - Avatar memakai aset karakter kantor yang sama dengan tint berbeda dan label `Penonton-xxx`.
 
